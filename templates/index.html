@@ -3,38 +3,98 @@
 
 {% block content %}
 <style>
-  body {
-    background: url("{{ url_for('static', filename='cennet_kapi.jpg') }}") no-repeat center center fixed;
-    background-size: cover;
-    color: black;
+  html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow: hidden;
+    background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+    color: white;
   }
-  .overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0, 0, 0, 1); /* yarı saydam koyu siyah */
-    z-index: -1;
+
+  /* Yıldızlar */
+  .stars, .stars2, .stars3 {
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    background: transparent;
+    box-shadow: 
+      100px 200px white,
+      300px 400px white,
+      600px 700px white,
+      800px 120px white,
+      1200px 300px white,
+      400px 900px white,
+      950px 600px white,
+      1100px 100px white,
+      1400px 400px white,
+      1600px 800px white;
+    animation: animStar 100s linear infinite;
   }
+
+  .stars2 {
+    width: 3px;
+    height: 3px;
+    box-shadow: 
+      200px 300px #fff,
+      500px 700px #fff,
+      900px 120px #fff,
+      1300px 600px #fff,
+      1700px 400px #fff;
+    animation: animStar 150s linear infinite;
+  }
+
+  .stars3 {
+    width: 1px;
+    height: 1px;
+    box-shadow: 
+      250px 500px #fff,
+      750px 200px #fff,
+      1250px 800px #fff,
+      1500px 300px #fff;
+    animation: animStar 200s linear infinite;
+  }
+
+  @keyframes animStar {
+    from { transform: translateY(0px); }
+    to { transform: translateY(-2000px); }
+  }
+
+  /* Kart yapısı */
   .card {
-    background-color: rgba(255, 255, 255, 0.7); /* saydam siyah kart */
+    background-color: rgba(0, 0, 30, 0.75);
+    border-radius: 15px;
     border: none;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+    color: white;
+    z-index: 10;
+    position: relative;
   }
-  a.btn {
-    font-weight: 600;
+
+  h1 {
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  p.lead, p {
+    font-size: 1.1rem;
+    line-height: 1.6;
   }
 </style>
 
-<div class="overlay"></div>
+<!-- Arka plan yıldız katmanları -->
+<div class="stars"></div>
+<div class="stars2"></div>
+<div class="stars3"></div>
 
 <div class="container d-flex flex-column justify-content-center align-items-center min-vh-100 pt-5 text-center">
-    <div class="card p-5 shadow" style="max-width: 600px; width: 100%;">
-        <h1 class="mb-3">Hoş Geldin!</h1>
-        <p class="lead mb-4">
-            Burada arkadaşlarınla bağlantı kurabilir, fotoğraflarını paylaşabilir ve biyografini düzenleyebilirsin. 
-            Sosyal medya deneyimini özgürce yaşa!
-        </p>
-        <p>
-            Hemen giriş yap ya da kayıt ol ve katıl!
-        </p>
-    </div>
+  <div class="card p-5 shadow" style="max-width: 600px; width: 100%;">
+    <h1 class="mb-3">Hoş Geldin!</h1>
+    <p class="lead mb-4">
+      Burada arkadaşlarınla bağlantı kurabilir, fotoğraflarını paylaşabilir ve biyografini düzenleyebilirsin. <br/>
+      Sosyal medya deneyimini özgürce yaşa!
+    </p>
+    <p>Hemen giriş yap ya da kayıt ol ve katıl!</p>
+  </div>
 </div>
 {% endblock %}
