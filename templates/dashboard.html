@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Yönetim Paneli</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-white">
+    <div class="container mt-5">
+        <h1 class="mb-4">Merhaba, {{ name }}!</h1>
+
+        {% if name == 'admin' %}
+            <div class="alert alert-info">
+                <h4>👑 Admin Paneli</h4>
+                <p>Burada tüm kullanıcıları yönetebilirsin, veritabanı kontrolleri yapabilirsin vb.</p>
+                <p><strong>(Simülasyon amaçlı içerik)</strong></p>
+            </div>
+        {% else %}
+            <p>Bu sayfa normal kullanıcı panelidir.</p>
+        {% endif %}
+
+        <a href="/logout" class="btn btn-danger mt-3">Çıkış Yap</a>
+    </div>
+</body>
+</html>
