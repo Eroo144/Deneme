@@ -2,10 +2,18 @@ from flask import Flask, render_template, redirect, url_for, request, flash
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+import os
+from werkzeug.utils import secure_filename
+import time
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'gizli_anahtar'  # Güçlü ve gizli bir anahtar belirle
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.config['UPLOAD_FOLDER'] = os.path.join('static', 'profile_images')
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 MB sınırı
+
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
@@ -17,8 +25,13 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), nullable=False, unique=True)
     password = db.Column(db.String(150), nullable=False)
+    bio = db.Column(db.Text, default="")  # Kullanıcı biyografisi
+    profile_image = db.Column(db.String(150), default="default.jpg")
 
 # Giriş yapan kullanıcıyı yükler
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -74,6 +87,29 @@ def admin_panel():
     
     flash("Yetkisiz erişim!", "danger")
     return redirect(url_for("dashboard"))
+
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    if request.method == 'POST':
+        bio = request.form.get('bio')
+        current_user.bio = bio
+
+        file = request.files.get('profile_image')
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            # Dosya adı çakışmasını önlemek için kullanıcı adı ve zaman damgası ekleyebiliriz
+            _, ext = os.path.splitext(filename)
+            filename = current_user.username + '_' + str(int(time.time())) + ext
+            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(file_path)
+            current_user.profile_image = filename
+        
+        db.session.commit()
+        flash('Profil güncellendi!', 'success')
+        return redirect(url_for('profile'))
+
+    return render_template('profile.html', user=current_user)
 
 
 if __name__ == "__main__":
