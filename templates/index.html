@@ -1,22 +1,40 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8" />
-    <title>Hoş Geldiniz</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
-</head>
-<body class="bg-light">
-    <div class="container d-flex justify-content-center align-items-center vh-100">
-        <div class="card p-4 shadow" style="min-width: 320px;">
-            <h2 class="text-center mb-4">Hoş Geldin!</h2>
-            <div class="d-grid gap-3">
-                <a href="{{ url_for('register') }}" class="btn btn-success btn-lg">Kayıt Ol</a>
-                <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">Giriş Yap</a>
-            </div>
-        </div>
-    </div>
+{% extends "base.html" %}
+{% block title %}Hoş Geldiniz{% endblock %}
 
-    <!-- Bootstrap JS Bundle -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
+{% block content %}
+<style>
+  body {
+    background: url("{{ url_for('static', filename='cennet_kapi.jpg') }}") no-repeat center center fixed;
+    background-size: cover;
+    color: black;
+  }
+  .overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 1); /* yarı saydam koyu siyah */
+    z-index: -1;
+  }
+  .card {
+    background-color: rgba(255, 255, 255, 0.7); /* saydam siyah kart */
+    border: none;
+  }
+  a.btn {
+    font-weight: 600;
+  }
+</style>
+
+<div class="overlay"></div>
+
+<div class="container d-flex flex-column justify-content-center align-items-center min-vh-100 pt-5 text-center">
+    <div class="card p-5 shadow" style="max-width: 600px; width: 100%;">
+        <h1 class="mb-3">Hoş Geldin!</h1>
+        <p class="lead mb-4">
+            Burada arkadaşlarınla bağlantı kurabilir, fotoğraflarını paylaşabilir ve biyografini düzenleyebilirsin. 
+            Sosyal medya deneyimini özgürce yaşa!
+        </p>
+        <p>
+            Hemen giriş yap ya da kayıt ol ve katıl!
+        </p>
+    </div>
+</div>
+{% endblock %}
