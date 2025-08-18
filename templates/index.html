@@ -1,100 +1,199 @@
 {% extends "base.html" %}
-{% block title %}Hoş Geldiniz{% endblock %}
+{% block title %}Sosyal Platform{% endblock %}
 
 {% block content %}
 <style>
+  /* YILDIZLAR VE ARKA PLAN */
   html, body {
     height: 100%;
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow: hidden;
+    overflow-x: hidden; /* Yatay kaydırmayı engelle */
     background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
     color: white;
   }
 
-  /* Yıldızlar */
   .stars, .stars2, .stars3 {
-    position: absolute;
+    position: fixed;
     width: 2px;
     height: 2px;
     background: transparent;
-    box-shadow: 
-      100px 200px white,
-      300px 400px white,
-      600px 700px white,
-      800px 120px white,
-      1200px 300px white,
-      400px 900px white,
-      950px 600px white,
-      1100px 100px white,
-      1400px 400px white,
-      1600px 800px white;
+    box-shadow: /* ... (yıldızlar aynı) ... */;
     animation: animStar 100s linear infinite;
   }
 
-  .stars2 {
-    width: 3px;
-    height: 3px;
-    box-shadow: 
-      200px 300px #fff,
-      500px 700px #fff,
-      900px 120px #fff,
-      1300px 600px #fff,
-      1700px 400px #fff;
-    animation: animStar 150s linear infinite;
+  /* KART SİSTEMİ */
+  .main-container {
+    display: flex;
+    justify-content: space-around; /* Kartları eşit aralıklı dağıt */
+    gap: 40px; /* Kart aralarını büyüt */
+    padding: 60px 5%; /* Yan boşlukları artır */
+    flex-wrap: wrap;
   }
 
-  .stars3 {
-    width: 1px;
-    height: 1px;
-    box-shadow: 
-      250px 500px #fff,
-      750px 200px #fff,
-      1250px 800px #fff,
-      1500px 300px #fff;
-    animation: animStar 200s linear infinite;
-  }
-
-  @keyframes animStar {
-    from { transform: translateY(0px); }
-    to { transform: translateY(-2000px); }
-  }
-
-  /* Kart yapısı */
   .card {
-    background-color: rgba(0, 0, 30, 0.75);
-    border-radius: 15px;
-    border: none;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+    background-color: rgba(0, 0, 30, 0.9);
+    border-radius: 20px; /* Köşeleri daha yuvarlak */
+    border: 1px solid rgba(110, 142, 251, 0.4);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
     color: white;
-    z-index: 10;
-    position: relative;
+    backdrop-filter: blur(10px);
+    padding: 35px;
+    width: 25%; /* Genişlikleri esnek */
+    min-width: 300px; /* Minimum genişlik */
+    max-width: 500px; /* Maksimum genişlik */
+    transition: all 0.4s;
+    overflow-y: auto; /* Dikey kaydırma */
+    max-height: 80vh; /* Maksimum yükseklik */
   }
 
-  h1 {
-    font-weight: 700;
-    letter-spacing: 1px;
+  .card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 50px rgba(110, 142, 251, 0.3);
   }
 
-  p.lead, p {
-    font-size: 1.1rem;
-    line-height: 1.6;
+  /* UZUN METİN DÜZENİ */
+  .scrollable-content {
+    overflow-y: auto;
+    padding-right: 15px; /* Kaydırma çubuğu için boşluk */
+    max-height: 60vh; /* İçerik yüksekliği */
   }
+
+  .scrollable-content::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .scrollable-content::-webkit-scrollbar-thumb {
+    background: rgba(110, 142, 251, 0.5);
+    border-radius: 3px;
+  }
+
+  /* MERKEZ KART */
+  .main-card {
+    flex-grow: 1; /* Diğerlerinden daha geniş */
+    min-width: 350px;
+  }
+
+  /* YAN KARTLAR */
+  .side-card {
+    flex-basis: 25%;
+  }
+
+  /* BUTONLAR */
+  .btn { /* ... (önceki buton stilleri aynı) ... */ }
 </style>
 
-<!-- Arka plan yıldız katmanları -->
+<!-- Yıldız Arka Plan -->
 <div class="stars"></div>
 <div class="stars2"></div>
 <div class="stars3"></div>
 
-<div class="container d-flex flex-column justify-content-center align-items-center min-vh-100 pt-5 text-center">
-  <div class="card p-5 shadow" style="max-width: 600px; width: 100%;">
-    <h1 class="mb-3">Hoş Geldin!</h1>
-    <p class="lead mb-4">
-      Burada arkadaşlarınla bağlantı kurabilir, fotoğraflarını paylaşabilir ve biyografini düzenleyebilirsin. <br/>
-      Sosyal medya deneyimini özgürce yaşa!
-    </p>
-    <p>Hemen giriş yap ya da kayıt ol ve katıl!</p>
+<!-- Ana sayfaya (index.html) ekleyin -->
+<div class="quick-actions">
+  <a href="/profile/edit" class="btn btn-sm btn-outline-light floating-btn">
+    <i class="fas fa-user-edit"></i> Profili Düzenle
+  </a>
+</div>
+
+<style>
+  .floating-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+</style>
+
+<!-- Ana İçerik -->
+<div class="main-container">
+  <!-- Sol Yan Kart -->
+  <div class="card side-card">
+    <h2>Topluluk Kuralları</h2>
+    <div class="scrollable-content">
+      <h3>1. Nezaket Kuralları</h3>
+      <p>Topluluğumuzda herkese saygılı davranılmalıdır. Küfürlü, aşağılayıcı veya nefret söylemi içeren hiçbir içeriğe izin verilmez. Unutmayın ki karşınızdaki de sizin gibi bir insan.</p>
+      
+      <h3>2. Gizlilik</h3>
+      <p>Kendi özel bilgilerinizi veya başkalarının kişisel bilgilerini paylaşmayın. Telefon numarası, adres, TC kimlik numarası gibi hassas bilgiler kesinlikle yasaktır.</p>
+      
+      <h3>3. İçerik Paylaşımı</h3>
+      <p>Spam, reklam veya uygunsuz içerik paylaşımı yapmayın. Paylaşımlarınızın topluluk kurallarına uygun olduğundan emin olun.</p>
+      
+      <h3>4. Telif Hakları</h3>
+      <p>Başkalarına ait içerikleri izinsiz paylaşmayın. Eğer paylaşım yapacaksanız mutlaka kaynak gösterin.</p>
+      
+      <h3>5. Etkileşim</h3>
+      <p>Diğer üyelerle pozitif etkileşimler kurun. Yapıcı eleştirilerde bulunabilirsiniz ancak bunu kibarca yapın.</p>
+    </div>
+  </div>
+
+  <!-- Merkez Kart -->
+  <div class="card main-card">
+    <h2>Yıldızlar Arasında Bağlantı Kur</h2>
+    <div class="scrollable-content">
+      <p>Evrenin sonsuz boşluğunda yalnız bir gezgin misiniz? Yıldızların altında yeni dostluklar kurmak için doğru yerdesiniz!</p>
+      
+      <h3>Neler Yapabilirsiniz?</h3>
+      <ul>
+        <li>Ortak ilgi alanlarınıza göre gruplar keşfedin</li>
+        <li>Online etkinliklere katılın</li>
+        <li>Özel sohbet odalarında tartışmalara katılın</li>
+        <li>Kendi topluluğunuzu oluşturun</li>
+      </ul>
+      
+      <h3>Nasıl Başlarım?</h3>
+      <ol>
+        <li>Hesabınızı oluşturun</li>
+        <li>Profilinizi tamamlayın</li>
+        <li>İlgi alanlarınızı seçin</li>
+        <li>Topluluğa katılın!</li>
+      </ol>
+    </div>
+    <div style="margin-top: 20px;">
+      <a href="/register" class="btn btn-primary">Ücretsiz Kaydol</a>
+      <a href="/login" class="btn btn-outline">Giriş Yap</a>
+    </div>
+  </div>
+
+  <!-- Sağ Yan Kart -->
+  <div class="card side-card">
+    <h2>Yakın Etkinlikler</h2>
+    <div class="scrollable-content">
+      <div class="event">
+        <h3>Galaktik Film Gecesi</h3>
+        <p><strong>Tarih:</strong> 15 Temmuz Cumartesi<br>
+        <strong>Saat:</strong> 20:00<br>
+        <strong>Konu:</strong> Bilim Kurgu Klasikleri</p>
+      </div>
+      
+      <div class="event">
+        <h3>Yıldız Gözlem Etkinliği</h3>
+        <p><strong>Tarih:</strong> 22 Temmuz Cumartesi<br>
+        <strong>Saat:</strong> 23:00<br>
+        <strong>Konum:</strong> Online - Canlı Yayın</p>
+      </div>
+      
+      <div class="event">
+        <h3>Kozmik Tartışma: Uzaylı Yaşamı</h3>
+        <p><strong>Tarih:</strong> 30 Temmuz Pazar<br>
+        <strong>Saat:</strong> 19:00<br>
+        <strong>Moderatör:</strong> Dr. Astro Bilim</p>
+      </div>
+      
+      <div class="event">
+        <h3>Uzay Fotoğrafçılığı Workshop</h3>
+        <p><strong>Tarih:</strong> 5 Ağustos Cumartesi<br>
+        <strong>Saat:</strong> 18:00<br>
+        <strong>Seviye:</strong> Başlangıç</p>
+      </div>
+    </div>
+    <a href="#" style="display: block; text-align: center; margin-top: 15px; color: #6e8efb;">Tüm Etkinlikler →</a>
   </div>
 </div>
 {% endblock %}

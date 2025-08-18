@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Profil Düzenle{% endblock %}
+
+{% block content %}
+<style>
+  .profile-container {
+    max-width: 800px;
+    margin: 2rem auto;
+  }
+  
+  .profile-card {
+    background: rgba(0, 0, 30, 0.85);
+    border-radius: 15px;
+    border: 1px solid rgba(110, 142, 251, 0.3);
+    backdrop-filter: blur(10px);
+  }
+  
+  .avatar-upload {
+    position: relative;
+    width: 150px;
+    margin: 0 auto;
+  }
+  
+  .avatar-preview {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    border: 3px solid #6e8efb;
+    object-fit: cover;
+    background: rgba(30, 30, 50, 0.7);
+  }
+  
+  .upload-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    background: #6e8efb;
+    color: white;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  
+  .social-input-group {
+    position: relative;
+  }
+  
+  .social-icon {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6e8efb;
+  }
+</style>
+
+<div class="profile-container">
+  <div class="card profile-card shadow-lg">
+    <div class="card-header text-center py-3">
+      <h3><i class="fas fa-user-edit me-2"></i>Profil Düzenle</h3>
+    </div>
+    
+    <div class="card-body p-4">
+      <form method="POST" enctype="multipart/form-data">
+        <!-- Profil Fotoğrafı -->
+        <div class="text-center mb-4">
+          <div class="avatar-upload">
+            <img id="avatar-preview" src="{{ current_user.avatar or '/static/default-avatar.jpg' }}" class="avatar-preview">
+            <label for="avatar-upload" class="upload-btn">
+              <i class="fas fa-camera"></i>
+              <input id="avatar-upload" type="file" name="avatar" accept="image/*" style="display:none;">
+            </label>
+          </div>
+        </div>
+
+        <!-- Kişisel Bilgiler -->
+        <div class="row mb-4">
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Ad</label>
+            <input type="text" name="first_name" class="form-control" value="{{ current_user.first_name }}">
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label">Soyad</label>
+            <input type="text" name="last_name" class="form-control" value="{{ current_user.last_name }}">
+          </div>
+        </div>
+
+        <!-- Biyografi -->
+        <div class="mb-4">
+          <label class="form-label">Biyografi</label>
+          <textarea name="bio" class="form-control" rows="4" placeholder="Kendinizden bahsedin...">{{ current_user.bio }}</textarea>
+        </div>
+
+        <!-- Sosyal Medya -->
+        <div class="mb-4">
+          <h5 class="mb-3"><i class="fas fa-share-alt me-2"></i>Sosyal Bağlantılar</h5>
+          
+          <div class="social-input-group mb-3">
+            <i class="fab fa-instagram social-icon"></i>
+            <input type="text" name="instagram" class="form-control ps-40" placeholder="Instagram" value="{{ current_user.instagram }}">
+          </div>
+          
+          <div class="social-input-group mb-3">
+            <i class="fab fa-twitter social-icon"></i>
+            <input type="text" name="twitter" class="form-control ps-40" placeholder="Twitter" value="{{ current_user.twitter }}">
+          </div>
+          
+          <div class="social-input-group">
+            <i class="fab fa-github social-icon"></i>
+            <input type="text" name="github" class="form-control ps-40" placeholder="GitHub" value="{{ current_user.github }}">
+          </div>
+        </div>
+
+        <!-- Kaydet Butonu -->
+        <div class="text-center mt-4">
+          <button type="submit" class="btn btn-primary px-4 py-2">
+            <i class="fas fa-save me-2"></i>Değişiklikleri Kaydet
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Profil fotoğrafı önizleme
+  document.getElementById('avatar-upload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        document.getElementById('avatar-preview').src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  });
+</script>
+{% endblock %}

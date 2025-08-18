@@ -2,42 +2,131 @@
 {% block title %}Giriş Yap{% endblock %}
 
 {% block content %}
+<style>
+  body {
+    background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%) fixed;
+    color: white;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  .stars, .stars2, .stars3 {
+    position: fixed;
+    width: 2px;
+    height: 2px;
+    background: transparent;
+    box-shadow: /* Yıldız gölgeleri */;
+    animation: animStar 100s linear infinite;
+  }
+  
+  @keyframes animStar {
+    from { transform: translateY(0px); }
+    to { transform: translateY(-2000px); }
+  }
+  
+  .card {
+    background-color: rgba(0, 0, 30, 0.85);
+    border: 1px solid rgba(110, 142, 251, 0.3);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 30px rgba(110, 142, 251, 0.2);
+  }
+  
+  .card-header {
+    background-color: rgba(20, 20, 40, 0.7);
+    border-bottom: 1px solid rgba(110, 142, 251, 0.3);
+    color: #6e8efb;
+  }
+  
+  .form-control {
+    background-color: rgba(30, 30, 50, 0.7);
+    border: 1px solid rgba(110, 142, 251, 0.3);
+    color: white;
+  }
+  
+  .form-control:focus {
+    background-color: rgba(40, 40, 60, 0.8);
+    border-color: #6e8efb;
+    color: white;
+    box-shadow: 0 0 0 0.25rem rgba(110, 142, 251, 0.25);
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, #6e8efb, #4a6cf7);
+    border: none;
+    transition: all 0.3s;
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(110, 142, 251, 0.4);
+  }
+  
+  .card-footer {
+    background-color: rgba(20, 20, 40, 0.5);
+    border-top: 1px solid rgba(110, 142, 251, 0.2);
+  }
+  
+  a {
+    color: #a777e3;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  
+  a:hover {
+    color: #6e8efb;
+  }
+  
+  .alert {
+    background-color: rgba(20, 20, 40, 0.9);
+    border: 1px solid rgba(110, 142, 251, 0.3);
+  }
+</style>
+
+<!-- Yıldız Arka Plan -->
+<div class="stars"></div>
+<div class="stars2"></div>
+<div class="stars3"></div>
+
 <div class="container mt-5">
     <div class="row justify-content-center">
-        <div class="col-md-4">
-            <div class="card shadow">
-                <div class="card-header text-center">
-                    <h4>Giriş Yap</h4>
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-lg">
+                <div class="card-header text-center py-3">
+                    <h4><i class="fas fa-rocket me-2"></i>Giriş Yap</h4>
                 </div>
-                <div class="card-body">
+                <div class="card-body px-4 py-4">
                     {% with messages = get_flashed_messages(with_categories=true) %}
                       {% if messages %}
-                        <div>
-                          {% for category, message in messages %}
-                            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                              {{ message }}
-                              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                            </div>
-                          {% endfor %}
-                        </div>
+                        {% for category, message in messages %}
+                          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                          </div>
+                        {% endfor %}
                       {% endif %}
                     {% endwith %}
 
                     <form method="POST">
                         <div class="mb-3">
-                            <input type="text" name="username" class="form-control" placeholder="Kullanıcı adı" required>
+                            <input type="text" name="username" class="form-control py-2" placeholder="Kullanıcı adı" required>
                         </div>
-                        <div class="mb-3">
-                            <input type="password" name="password" class="form-control" placeholder="Şifre" required>
+                        <div class="mb-4">
+                            <input type="password" name="password" class="form-control py-2" placeholder="Şifre" required>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Giriş Yap</button>
+                        <button type="submit" class="btn btn-primary py-2 w-100">
+                            <i class="fas fa-sign-in-alt me-2"></i>Giriş Yap
+                        </button>
                     </form>
                 </div>
-                <div class="card-footer text-center">
-                    <a href="{{ url_for('register') }}">Hesabın yok mu? Kayıt ol</a>
+                <div class="card-footer text-center py-3">
+                    <a href="{{ url_for('register') }}"><i class="fas fa-user-plus me-1"></i>Hesabın yok mu? Kayıt ol</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- FontAwesome Icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 {% endblock %}
