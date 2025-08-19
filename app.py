@@ -95,14 +95,7 @@ def posts():
         return redirect(url_for("posts"))
 
     # Takip ettiğiniz kişilerin gönderilerini alın
-    followed_posts = current_user.followed_posts().all()
-
-    # Kendi gönderilerinizi alın
-    own_posts = Post.query.filter_by(user_id=current_user.id).all()
-
-    # İki listeyi birleştir
-    all_posts = followed_posts + own_posts
-
+    all_posts = Post.query.order_by(Post.timestamp.desc()).all()
     # Gönderileri tarihine göre sırala
     all_posts.sort(key=lambda x: x.timestamp, reverse=True)
 
