@@ -1,15 +1,17 @@
 from flask import Flask, render_template, redirect, url_for, request, flash
-from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
-from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 import os
 from werkzeug.utils import secure_filename
 import time
 from datetime import datetime
 from flask_migrate import Migrate
 
+# Önce models modülünden db'yi import ediyoruz
+from models import db, User, Post, Comment
+
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'gizli_anahtar'  # Güçlü ve gizli bir anahtar belirle
+app.config['SECRET_KEY'] = 'gizli_anahtar'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
@@ -19,69 +21,14 @@ app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 MB sınırı
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-db = SQLAlchemy(app)
+# Bağlantı oluşturma
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
-login_manager.login_view = 'login'  # login_required yönlendirmeleri buraya
+login_manager.login_view = 'login'
 
+# db'yi app ile başlat
+db.init_app(app)
 migrate = Migrate(app, db)
-
-# ===================== MODELLER ===================== #
-
-# Takipçi - Takip edilen ilişkisi (many-to-many)
-followers = db.Table('followers',
-    db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
-    db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
-)
-
-class Post(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    body = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    image = db.Column(db.String(150), nullable=True)  # Fotoğraf ekleme alanı
-
-    user = db.relationship('User', backref=db.backref('posts', lazy=True))
-
-class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(150), nullable=False, unique=True)
-    password = db.Column(db.String(150), nullable=False)
-    bio = db.Column(db.Text, default="")  
-    profile_image = db.Column(db.String(150), default="default.jpg")
-
-    followed = db.relationship(
-        'User', secondary=followers,
-        primaryjoin=(followers.c.follower_id == id),
-        secondaryjoin=(followers.c.followed_id == id),
-        backref=db.backref('followers', lazy='dynamic'), lazy='dynamic'
-    )
-
-    def follow(self, user):
-        if not self.is_following(user):
-            self.followed.append(user)
-
-    def unfollow(self, user):
-        if self.is_following(user):
-            self.followed.remove(user)
-
-    def is_following(self, user):
-        return self.followed.filter(followers.c.followed_id == user.id).count() > 0
-
-    def followers_count(self):
-        return self.followers.count()
-
-    def following_count(self):
-        return self.followed.count()
-
-    def posts_count(self):
-        return Post.query.filter_by(user_id=self.id).count()  # Doğru sorgu
-
-    def followed_posts(self):
-        return Post.query.join(
-            followers, (followers.c.followed_id == Post.user_id)
-        ).filter(followers.c.follower_id == self.id).order_by(Post.timestamp.desc())
-
 
 # ===================== LOGIN MANAGER ===================== #
 
@@ -161,6 +108,34 @@ def posts():
 
     return render_template("posts.html", posts=all_posts)
 
+# Beğenme işlemi
+@app.route('/like_post/<int:post_id>', methods=['POST'])
+@login_required
+def like_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    if post.is_liked_by(current_user):
+        post.unlike(current_user)
+        flash("Gönderiden çıkarıldı", "info")
+    else:
+        post.like(current_user)
+        flash("Gönderiye beğeni yapıldı", "success")
+    db.session.commit()
+    return redirect(url_for('posts'))
+
+# Yorum ekleme işlemi
+@app.route('/comment_post/<int:post_id>', methods=['POST'])
+@login_required
+def comment_post(post_id):
+    post = Post.query.get_or_404(post_id)
+    comment_content = request.form['comment']
+    if comment_content.strip():
+        comment = Comment(body=comment_content, post_id=post.id, user_id=current_user.id)
+        db.session.add(comment)
+        db.session.commit()
+        flash("Yorum başarıyla eklendi!", "success")
+    else:
+        flash("Yorum boş olamaz!", "warning")
+    return redirect(url_for('posts'))
 
 @app.route("/logout")
 @login_required

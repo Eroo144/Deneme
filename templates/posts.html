@@ -1,36 +1,109 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Gönderiler</h2>
+<div class="container-fluid vh-100">
+    <div class="row h-100">
+        <!-- Sol: Gönderi Paylaşma Kartı -->
+        <div class="col-md-3 h-100 d-flex flex-column" style="padding-right: 30px; position: sticky; top: 0;">
+            <h3>Gönderi Paylaş</h3>
+            <form method="POST" enctype="multipart/form-data" class="mb-4">
+                <textarea name="content" rows="3" placeholder="Bir şeyler yaz..." class="form-control mb-2" required></textarea><br>
+                
+                <!-- Fotoğraf Yükleme Alanı -->
+                <input type="file" name="image" accept="image/*" class="form-control mb-2">
+                
+                <button type="submit" class="btn btn-primary w-100">Paylaş</button>
+            </form>
+        </div>
 
-<!-- Gönderi Paylaşma Formu -->
-<form method="POST" enctype="multipart/form-data" class="mb-4">
-    <textarea name="content" rows="3" placeholder="Bir şeyler yaz..." class="form-control mb-2"></textarea><br>
-    
-    <!-- Fotoğraf Yükleme Alanı -->
-    <input type="file" name="image" accept="image/*" class="form-control mb-2">
-    
-    <button type="submit" class="btn btn-primary w-100">Paylaş</button>
-</form>
-
-<hr>
-
-<!-- Gönderi Listesi -->
-{% for post in posts %}
-    <div style="border: 1px solid #ccc; padding: 15px; margin-top: 15px; border-radius: 10px; background-color: #f9f9f9; color: #333;">
-        <strong style="color: #007bff;">{{ post.user.username }}</strong><br>
-        <small style="font-size: 0.9em; color: #777;">{{ post.timestamp.strftime("%d.%m.%Y %H:%M") }}</small>
-        <p style="font-size: 1.1em; color: #444;">{{ post.body }}</p>
-        
-        <!-- Fotoğraf Yüklenmişse Görüntüle -->
-        {% if post.image %}
-            <div class="mt-2">
-                <img src="{{ url_for('static', filename='post_images/' + post.image) }}" alt="Post image" class="img-fluid" style="max-width: 100%; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);">
+        <!-- Ortada: Gönderi Akışı -->
+        <div class="col-md-6 h-100" style="overflow-y: auto; padding: 0 15px;">
+            <h3>Gönderiler</h3>
+            <div class="posts-list">
+                {% for post in posts %}
+                    <div style="border: 1px solid #ccc; padding: 20px; margin-bottom: 20px; border-radius: 10px; background-color: #f9f9f9; color: #333; box-shadow: 0px 2px 8px rgba(0,0,0,0.1);">
+                        <strong style="color: #007bff; font-size: 1.2em;">{{ post.author.username }}</strong><br>
+                        <small style="font-size: 0.9em; color: #777;">{{ post.timestamp.strftime("%d.%m.%Y %H:%M") }}</small>
+                        <p style="font-size: 1.2em; color: #444;">{{ post.body }}</p>
+                        
+                        <!-- Fotoğraf Yüklenmişse Görüntüle -->
+                        {% if post.image %}
+                            <div class="mt-2" style="max-width: 100%; overflow: auto;">
+                                <img src="{{ url_for('static', filename='post_images/' + post.image) }}" alt="Post image" class="img-fluid" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);">
+                            </div>
+                        {% endif %}
+                        
+                        <!-- BEĞENİ ve YORUM BÖLÜMÜ -->
+                        <div class="mt-3">
+                            <!-- Beğeni butonu -->
+                            <form action="{{ url_for('like_post', post_id=post.id) }}" method="POST" style="display: inline;">
+                                <button type="submit" class="btn btn-sm {% if post.is_liked_by(current_user) %}btn-danger{% else %}btn-outline-danger{% endif %} me-2">
+                                    ❤️ Beğen ({{ post.liked_by|length }})
+                                </button>
+                            </form>
+                            
+                            <!-- Yorum sayısı -->
+                            <span class="text-muted">💬 Yorumlar ({{ post.post_comments|length }})</span>
+                        </div>
+                        
+                        <!-- YORUM YAPMA FORMU -->
+                        <div class="mt-3">
+                            <form action="{{ url_for('comment_post', post_id=post.id) }}" method="POST">
+                                <div class="input-group">
+                                    <input type="text" name="comment" class="form-control" placeholder="Yorum yaz..." required>
+                                    <button type="submit" class="btn btn-primary">Gönder</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- YORUMLARI GÖSTER -->
+                        {% if post.post_comments %}
+                            <div class="mt-3" style="border-top: 1px solid #eee; padding-top: 10px;">
+                                <h6>Yorumlar:</h6>
+                                {% for comment in post.post_comments %}
+                                    <div class="mb-2 p-2" style="background-color: #f0f0f0; border-radius: 5px;">
+                                        <strong>{{ comment.user.username }}</strong>: 
+                                        {{ comment.body }}
+                                        <br>
+                                        <small class="text-muted">{{ comment.timestamp.strftime("%d.%m.%Y %H:%M") }}</small>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <p>Henüz gönderi yok.</p>
+                {% endfor %}
             </div>
-        {% endif %}
-    </div>
-{% else %}
-    <p>Henüz gönderi yok.</p>
-{% endfor %}
+        </div>
 
+        <!-- Sağ: Bilgilendirme Kartı -->
+        <div class="col-md-3 h-100" style="padding-left: 30px; position: sticky; top: 0;">
+            <h3>Bilgilendirme</h3>
+            <div style="border: 1px solid #ccc; padding: 20px; border-radius: 10px; background-color: #f1f1f1; box-shadow: 0px 2px 8px rgba(0,0,0,0.1);">
+                <p style="color: #333; font-size: 1.1em;">Bu alanda kullanıcılar için çeşitli bilgilendirmeler yapılabilir. Örneğin, hesap ayarları, duyurular veya yeni gelen özellikler hakkında bilgiler verilebilir.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .container-fluid.vh-100 {
+        height: 100vh;
+        max-width: 100%;
+    }
+    
+    .row.h-100 {
+        height: 100%;
+    }
+    
+    .col-md-3.h-100 {
+        height: 100%;
+    }
+    
+    .col-md-6.h-100 {
+        height: 100%;
+        max-height: 100vh;
+    }
+</style>
 {% endblock %}
