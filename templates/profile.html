@@ -32,18 +32,6 @@
     border: 1px solid rgba(110, 142, 251, 0.3);
   }
   
-  .social-links a {
-    color: white;
-    font-size: 1.5rem;
-    margin: 0 10px;
-    transition: all 0.3s;
-  }
-  
-  .social-links a:hover {
-    color: #6e8efb;
-    transform: translateY(-3px);
-  }
-  
   .profile-stats {
     display: flex;
     justify-content: space-around;
@@ -53,22 +41,31 @@
   .stat-item {
     text-align: center;
   }
+  
+  .edit-form {
+    margin-top: 2rem;
+  }
+  
+  .edit-form textarea {
+    width: 100%;
+    min-height: 100px;
+    margin-bottom: 1rem;
+    border-radius: 10px;
+    padding: 10px;
+    border: 1px solid #6e8efb;
+  }
+  
+  .edit-form input[type="file"] {
+    margin-bottom: 1rem;
+  }
 </style>
 
 <div class="profile-container">
   <div class="profile-header">
-    <img src="{{ user.avatar_url or '/static/default-avatar.jpg' }}" class="profile-avatar">
-    <h1>{{ user.first_name }} {{ user.last_name }}</h1>
-    <p class="text-muted">@{{ user.username }}</p>
-    
-    <div class="social-links">
-      {% if user.instagram %}
-      <a href="https://instagram.com/{{ user.instagram }}" target="_blank"><i class="fab fa-instagram"></i></a>
-      {% endif %}
-      {% if user.twitter %}
-      <a href="https://twitter.com/{{ user.twitter }}" target="_blank"><i class="fab fa-twitter"></i></a>
-      {% endif %}
-    </div>
+    <img src="{{ url_for('static', filename='profile_images/' ~ user.profile_image) }}" 
+         alt="Avatar" class="profile-avatar">
+
+    <h1>@{{ user.username }}</h1>
   </div>
   
   <div class="profile-body">
@@ -79,26 +76,32 @@
     
     <div class="profile-stats">
       <div class="stat-item">
-        <h4>245</h4>
+        <h4>0</h4>
         <p>Takipçi</p>
       </div>
       <div class="stat-item">
-        <h4>156</h4>
+        <h4>0</h4>
         <p>Takip</p>
       </div>
       <div class="stat-item">
-        <h4>32</h4>
+        <h4>0</h4>
         <p>Gönderi</p>
       </div>
     </div>
     
-    <div class="actions">
-      <button class="btn btn-primary">Takip Et</button>
-      <button class="btn btn-outline-light">Mesaj Gönder</button>
+    <!-- Profil Düzenleme Formu -->
+    <div class="edit-form">
+      <h3>Profili Düzenle</h3>
+      <form method="POST" enctype="multipart/form-data">
+        <label for="bio">Biyografi:</label>
+        <textarea name="bio" id="bio">{{ user.bio }}</textarea>
+        
+        <label for="profile_image">Profil Fotoğrafı Yükle:</label>
+        <input type="file" name="profile_image" id="profile_image" accept="image/*">
+        
+        <button type="submit" class="btn btn-success">Kaydet</button>
+      </form>
     </div>
   </div>
 </div>
-
-<!-- FontAwesome -->
-<script src="https://kit.fontawesome.com/a076d05399.js"></script>
 {% endblock %}

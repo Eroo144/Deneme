@@ -20,7 +20,14 @@ bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'  # login_required yönlendirmeleri buraya
 
-# Kullanıcı modeli
+# ===================== MODELLER ===================== #
+
+# Takipçi - Takip edilen ilişkisi (many-to-many)
+followers = db.Table('followers',
+    db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
+    db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
+)
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), nullable=False, unique=True)
@@ -28,13 +35,43 @@ class User(db.Model, UserMixin):
     bio = db.Column(db.Text, default="")  # Kullanıcı biyografisi
     profile_image = db.Column(db.String(150), default="default.jpg")
 
-# Giriş yapan kullanıcıyı yükler
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    # Takip sistemi
+    followed = db.relationship(
+        'User', secondary=followers,
+        primaryjoin=(followers.c.follower_id == id),
+        secondaryjoin=(followers.c.followed_id == id),
+        backref=db.backref('followers', lazy='dynamic'), lazy='dynamic'
+    )
+
+    def follow(self, user):
+        if not self.is_following(user):
+            self.followed.append(user)
+
+    def unfollow(self, user):
+        if self.is_following(user):
+            self.followed.remove(user)
+
+    def is_following(self, user):
+        return self.followed.filter(followers.c.followed_id == user.id).count() > 0
+
+    def followers_count(self):
+        return self.followers.count()
+
+    def following_count(self):
+        return self.followed.count()
+
+    def posts_count(self):
+        # Eğer Post tablosu eklersek:
+        # return Post.query.filter_by(user_id=self.id).count()
+        return 0  # şimdilik 0 dönüyor
+
+# ===================== LOGIN MANAGER ===================== #
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+# ===================== ROUTELAR ===================== #
 
 @app.route("/")
 def index():
@@ -88,6 +125,8 @@ def admin_panel():
     flash("Yetkisiz erişim!", "danger")
     return redirect(url_for("dashboard"))
 
+# ===================== PROFİL ===================== #
+
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
@@ -98,7 +137,6 @@ def profile():
         file = request.files.get('profile_image')
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
-            # Dosya adı çakışmasını önlemek için kullanıcı adı ve zaman damgası ekleyebiliriz
             _, ext = os.path.splitext(filename)
             filename = current_user.username + '_' + str(int(time.time())) + ext
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
@@ -109,8 +147,47 @@ def profile():
         flash('Profil güncellendi!', 'success')
         return redirect(url_for('profile'))
 
-    return render_template('profile.html', user=current_user)
+    # İstatistikleri al
+    stats = {
+        "followers": current_user.followers_count(),
+        "following": current_user.following_count(),
+        "posts": current_user.posts_count()
+    }
 
+    return render_template('profile.html', user=current_user, stats=stats)
+
+# ===================== TAKİP ET / BIRAK ===================== #
+
+@app.route('/follow/<username>', methods=['POST'])
+@login_required
+def follow(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    if user == current_user:
+        flash("Kendi kendini takip edemezsin!", "warning")
+        return redirect(url_for('profile'))
+    current_user.follow(user)
+    db.session.commit()
+    flash(f"{user.username} adlı kişiyi takip ettin", "success")
+    return redirect(url_for('profile', username=username))
+
+@app.route('/unfollow/<username>', methods=['POST'])
+@login_required
+def unfollow(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    if user == current_user:
+        flash("Kendi kendini takipten çıkaramazsın!", "warning")
+        return redirect(url_for('profile'))
+    current_user.unfollow(user)
+    db.session.commit()
+    flash(f"{user.username} adlı kişiyi takipten çıktın", "info")
+    return redirect(url_for('profile', username=username))
+
+# ===================== HELPER ===================== #
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# ===================== MAIN ===================== #
 
 if __name__ == "__main__":
     with app.app_context():
