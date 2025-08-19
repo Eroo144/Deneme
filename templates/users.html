@@ -49,7 +49,8 @@
 
 <div class="container mt-4">
   <div class="profile-card">
-    <img src="{{ url_for('static', filename='post_images/' ~ (user.profile_image if user.profile_image else 'default_avatar.jpg')) }}" class="profile-avatar" alt="Profil Fotoğrafı">
+    <!-- KRİTİK DÜZELTME: post_images/ -> profile_images/ -->
+    <img src="{{ url_for('static', filename='profile_images/' ~ (user.profile_image if user.profile_image else 'default_avatar.png')) }}" class="profile-avatar" alt="Profil Fotoğrafı">
     <h3>{{ user.username }}</h3>
     <p>{{ user.bio or "Henüz biyografi yazılmamış." }}</p>
 
@@ -60,7 +61,8 @@
     </div>
 
     {% if current_user != user %}
-      <form method="POST" action="{{ url_for('follow' if not is_following else 'unfollow', username=user.username) }}" class="follow-btn">
+      <!-- Form Action URL'leri düzgün oluşturuldu -->
+      <form method="POST" action="{{ url_for('follow', username=user.username) if not is_following else url_for('unfollow', username=user.username) }}" class="follow-btn">
         <button type="submit" class="btn btn-{{ 'primary' if not is_following else 'secondary' }}">
           {{ 'Takip Et' if not is_following else 'Takibi Bırak' }}
         </button>

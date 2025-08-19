@@ -55,6 +55,11 @@
     top: 50%;
     transform: translateY(-50%);
     color: #6e8efb;
+    z-index: 10; /* Input alanının üstünde görünmesi için */
+  }
+  /* DÜZELTME: ps-40 -> ps-5 ve padding-left eklendi */
+  .social-input-group .form-control {
+    padding-left: 2.5rem !important; /* İkon için alan aç */
   }
 </style>
 
@@ -69,7 +74,8 @@
         <!-- Profil Fotoğrafı -->
         <div class="text-center mb-4">
           <div class="avatar-upload">
-            <img id="avatar-preview" src="{{ current_user.avatar or '/static/default-avatar.jpg' }}" class="avatar-preview">
+            <!-- DÜZELTME: profile_images klasörüne işaret etmeli -->
+            <img id="avatar-preview" src="{{ url_for('static', filename='profile_images/' ~ (current_user.profile_image if current_user.profile_image else 'default_avatar.png')) }}" class="avatar-preview">
             <label for="avatar-upload" class="upload-btn">
               <i class="fas fa-camera"></i>
               <input id="avatar-upload" type="file" name="avatar" accept="image/*" style="display:none;">
@@ -81,18 +87,18 @@
         <div class="row mb-4">
           <div class="col-md-6 mb-3">
             <label class="form-label">Ad</label>
-            <input type="text" name="first_name" class="form-control" value="{{ current_user.first_name }}">
+            <input type="text" name="first_name" class="form-control" value="{{ current_user.first_name or '' }}">
           </div>
           <div class="col-md-6 mb-3">
             <label class="form-label">Soyad</label>
-            <input type="text" name="last_name" class="form-control" value="{{ current_user.last_name }}">
+            <input type="text" name="last_name" class="form-control" value="{{ current_user.last_name or '' }}">
           </div>
         </div>
 
         <!-- Biyografi -->
         <div class="mb-4">
           <label class="form-label">Biyografi</label>
-          <textarea name="bio" class="form-control" rows="4" placeholder="Kendinizden bahsedin...">{{ current_user.bio }}</textarea>
+          <textarea name="bio" class="form-control" rows="4" placeholder="Kendinizden bahsedin...">{{ current_user.bio or '' }}</textarea>
         </div>
 
         <!-- Sosyal Medya -->
@@ -101,17 +107,18 @@
           
           <div class="social-input-group mb-3">
             <i class="fab fa-instagram social-icon"></i>
-            <input type="text" name="instagram" class="form-control ps-40" placeholder="Instagram" value="{{ current_user.instagram }}">
+            <!-- DÜZELTME: ps-40 -> ps-5 (Bootstrap class'ı) -->
+            <input type="text" name="instagram" class="form-control ps-5" placeholder="Instagram" value="{{ current_user.instagram or '' }}">
           </div>
           
           <div class="social-input-group mb-3">
             <i class="fab fa-twitter social-icon"></i>
-            <input type="text" name="twitter" class="form-control ps-40" placeholder="Twitter" value="{{ current_user.twitter }}">
+            <input type="text" name="twitter" class="form-control ps-5" placeholder="Twitter" value="{{ current_user.twitter or '' }}">
           </div>
           
           <div class="social-input-group">
             <i class="fab fa-github social-icon"></i>
-            <input type="text" name="github" class="form-control ps-40" placeholder="GitHub" value="{{ current_user.github }}">
+            <input type="text" name="github" class="form-control ps-5" placeholder="GitHub" value="{{ current_user.github or '' }}">
           </div>
         </div>
 
