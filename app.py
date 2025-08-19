@@ -5,11 +5,13 @@ from flask_login import LoginManager, UserMixin, login_user, login_required, log
 import os
 from werkzeug.utils import secure_filename
 import time
+from datetime import datetime
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'gizli_anahtar'  # Güçlü ve gizli bir anahtar belirle
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config["TEMPLATES_AUTO_RELOAD"] = True
+
 app.config['UPLOAD_FOLDER'] = os.path.join('static', 'profile_images')
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 MB sınırı
 
@@ -22,20 +24,26 @@ login_manager.login_view = 'login'  # login_required yönlendirmeleri buraya
 
 # ===================== MODELLER ===================== #
 
-# Takipçi - Takip edilen ilişkisi (many-to-many)
 followers = db.Table('followers',
     db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
 )
 
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    user = db.relationship('User', backref=db.backref('posts', lazy=True))
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(150), nullable=False, unique=True)
     password = db.Column(db.String(150), nullable=False)
-    bio = db.Column(db.Text, default="")  # Kullanıcı biyografisi
+    bio = db.Column(db.Text, default="")  
     profile_image = db.Column(db.String(150), default="default.jpg")
 
-    # Takip sistemi
     followed = db.relationship(
         'User', secondary=followers,
         primaryjoin=(followers.c.follower_id == id),
@@ -61,9 +69,12 @@ class User(db.Model, UserMixin):
         return self.followed.count()
 
     def posts_count(self):
-        # Eğer Post tablosu eklersek:
-        # return Post.query.filter_by(user_id=self.id).count()
-        return 0  # şimdilik 0 dönüyor
+        return self.posts.count()
+
+    def followed_posts(self):
+        return Post.query.join(
+            followers, (followers.c.followed_id == Post.user_id)
+        ).filter(followers.c.follower_id == self.id).order_by(Post.timestamp.desc())
 
 # ===================== LOGIN MANAGER ===================== #
 
@@ -109,6 +120,25 @@ def login():
 def dashboard():
     return render_template("dashboard.html", name=current_user.username)
 
+@app.route("/posts", methods=["GET", "POST"])
+@login_required
+def posts():
+    if request.method == "POST":
+        content = request.form["content"]
+        if content.strip():
+            post = Post(body=content, user_id=current_user.id)
+            db.session.add(post)
+            db.session.commit()
+            flash("Gönderi paylaşıldı!", "success")
+        else:
+            flash("Boş gönderi paylaşılamaz!", "warning")
+        return redirect(url_for("posts"))
+
+    followed = current_user.followed_posts()
+    own = Post.query.filter_by(user_id=current_user.id)
+    all_posts = followed.union(own).order_by(Post.timestamp.desc()).all()
+    return render_template("posts.html", posts=all_posts)
+
 @app.route("/logout")
 @login_required
 def logout():
@@ -139,7 +169,7 @@ def profile():
             filename = secure_filename(file.filename)
             _, ext = os.path.splitext(filename)
             filename = current_user.username + '_' + str(int(time.time())) + ext
-            file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file_path = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename)
             file.save(file_path)
             current_user.profile_image = filename
         
@@ -147,7 +177,6 @@ def profile():
         flash('Profil güncellendi!', 'success')
         return redirect(url_for('profile'))
 
-    # İstatistikleri al
     stats = {
         "followers": current_user.followers_count(),
         "following": current_user.following_count(),
@@ -168,7 +197,7 @@ def follow(username):
     current_user.follow(user)
     db.session.commit()
     flash(f"{user.username} adlı kişiyi takip ettin", "success")
-    return redirect(url_for('profile', username=username))
+    return redirect(url_for('profile'))
 
 @app.route('/unfollow/<username>', methods=['POST'])
 @login_required
@@ -180,7 +209,7 @@ def unfollow(username):
     current_user.unfollow(user)
     db.session.commit()
     flash(f"{user.username} adlı kişiyi takipten çıktın", "info")
-    return redirect(url_for('profile', username=username))
+    return redirect(url_for('profile'))
 
 # ===================== HELPER ===================== #
 

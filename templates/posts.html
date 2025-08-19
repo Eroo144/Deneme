@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Gönderiler</h2>
+
+<form method="POST">
+    <textarea name="content" rows="3" placeholder="Bir şeyler yaz..."></textarea><br>
+    <button type="submit">Paylaş</button>
+</form>
+
+<hr>
+
+{% for post in posts %}
+    <div style="border: 1px solid #ccc; padding: 10px; margin-top: 10px;">
+        <strong>{{ post.user.username }}</strong><br>
+        <small>{{ post.timestamp.strftime("%d.%m.%Y %H:%M") }}</small>
+        <p>{{ post.body }}</p>
+    </div>
+{% else %}
+    <p>Henüz gönderi yok.</p>
+{% endfor %}
+
+{% endblock %}
