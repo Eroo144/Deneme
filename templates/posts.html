@@ -3,18 +3,31 @@
 {% block content %}
 <h2>Gönderiler</h2>
 
-<form method="POST">
-    <textarea name="content" rows="3" placeholder="Bir şeyler yaz..."></textarea><br>
-    <button type="submit">Paylaş</button>
+<!-- Gönderi Paylaşma Formu -->
+<form method="POST" enctype="multipart/form-data" class="mb-4">
+    <textarea name="content" rows="3" placeholder="Bir şeyler yaz..." class="form-control mb-2"></textarea><br>
+    
+    <!-- Fotoğraf Yükleme Alanı -->
+    <input type="file" name="image" accept="image/*" class="form-control mb-2">
+    
+    <button type="submit" class="btn btn-primary w-100">Paylaş</button>
 </form>
 
 <hr>
 
+<!-- Gönderi Listesi -->
 {% for post in posts %}
-    <div style="border: 1px solid #ccc; padding: 10px; margin-top: 10px;">
-        <strong>{{ post.user.username }}</strong><br>
-        <small>{{ post.timestamp.strftime("%d.%m.%Y %H:%M") }}</small>
-        <p>{{ post.body }}</p>
+    <div style="border: 1px solid #ccc; padding: 15px; margin-top: 15px; border-radius: 10px; background-color: #f9f9f9; color: #333;">
+        <strong style="color: #007bff;">{{ post.user.username }}</strong><br>
+        <small style="font-size: 0.9em; color: #777;">{{ post.timestamp.strftime("%d.%m.%Y %H:%M") }}</small>
+        <p style="font-size: 1.1em; color: #444;">{{ post.body }}</p>
+        
+        <!-- Fotoğraf Yüklenmişse Görüntüle -->
+        {% if post.image %}
+            <div class="mt-2">
+                <img src="{{ url_for('static', filename='post_images/' + post.image) }}" alt="Post image" class="img-fluid" style="max-width: 100%; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);">
+            </div>
+        {% endif %}
     </div>
 {% else %}
     <p>Henüz gönderi yok.</p>

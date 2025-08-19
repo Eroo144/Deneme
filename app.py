@@ -6,13 +6,15 @@ import os
 from werkzeug.utils import secure_filename
 import time
 from datetime import datetime
+from flask_migrate import Migrate
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'gizli_anahtar'  # Güçlü ve gizli bir anahtar belirle
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
-app.config['UPLOAD_FOLDER'] = os.path.join('static', 'profile_images')
+# Fotoğraf yükleme klasörlerini ve sınırlarını ayarlama
+app.config['UPLOAD_FOLDER'] = os.path.join('static', 'post_images')
 app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 MB sınırı
 
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
@@ -22,8 +24,11 @@ bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'  # login_required yönlendirmeleri buraya
 
+migrate = Migrate(app, db)
+
 # ===================== MODELLER ===================== #
 
+# Takipçi - Takip edilen ilişkisi (many-to-many)
 followers = db.Table('followers',
     db.Column('follower_id', db.Integer, db.ForeignKey('user.id')),
     db.Column('followed_id', db.Integer, db.ForeignKey('user.id'))
@@ -34,6 +39,7 @@ class Post(db.Model):
     body = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    image = db.Column(db.String(150), nullable=True)  # Fotoğraf ekleme alanı
 
     user = db.relationship('User', backref=db.backref('posts', lazy=True))
 
@@ -69,12 +75,13 @@ class User(db.Model, UserMixin):
         return self.followed.count()
 
     def posts_count(self):
-        return self.posts.count()
+        return Post.query.filter_by(user_id=self.id).count()  # Doğru sorgu
 
     def followed_posts(self):
         return Post.query.join(
             followers, (followers.c.followed_id == Post.user_id)
         ).filter(followers.c.follower_id == self.id).order_by(Post.timestamp.desc())
+
 
 # ===================== LOGIN MANAGER ===================== #
 
@@ -125,19 +132,35 @@ def dashboard():
 def posts():
     if request.method == "POST":
         content = request.form["content"]
-        if content.strip():
-            post = Post(body=content, user_id=current_user.id)
-            db.session.add(post)
-            db.session.commit()
-            flash("Gönderi paylaşıldı!", "success")
-        else:
-            flash("Boş gönderi paylaşılamaz!", "warning")
+        image = request.files.get("image")  # Fotoğrafı alıyoruz
+
+        image_filename = None
+        if image:
+            # Fotoğrafın adı ve uzantısını güvenli bir şekilde alıyoruz
+            image_filename = secure_filename(image.filename)
+            image_path = os.path.join(app.root_path, 'static', 'post_images', image_filename)
+            image.save(image_path)  # Fotoğrafı kaydediyoruz
+
+        post = Post(body=content, user_id=current_user.id, image=image_filename)  # Fotoğrafı veritabanına kaydediyoruz
+        db.session.add(post)
+        db.session.commit()
+        flash("Gönderi paylaşıldı!", "success")
         return redirect(url_for("posts"))
 
-    followed = current_user.followed_posts()
-    own = Post.query.filter_by(user_id=current_user.id)
-    all_posts = followed.union(own).order_by(Post.timestamp.desc()).all()
+    # Takip ettiğiniz kişilerin gönderilerini alın
+    followed_posts = current_user.followed_posts().all()
+
+    # Kendi gönderilerinizi alın
+    own_posts = Post.query.filter_by(user_id=current_user.id).all()
+
+    # İki listeyi birleştir
+    all_posts = followed_posts + own_posts
+
+    # Gönderileri tarihine göre sırala
+    all_posts.sort(key=lambda x: x.timestamp, reverse=True)
+
     return render_template("posts.html", posts=all_posts)
+
 
 @app.route("/logout")
 @login_required
