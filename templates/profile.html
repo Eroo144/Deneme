@@ -62,34 +62,37 @@
 
 <div class="profile-container">
   <div class="profile-header">
-    <img src="{{ url_for('static', filename='profile_images/' ~ user.profile_image) }}" 
+    <!-- Profil Fotoğrafı -->
+    <img src="{{ url_for('static', filename='profile_images/' ~ (user.profile_image if user.profile_image else 'default_avatar.png')) }}" 
          alt="Avatar" class="profile-avatar">
 
     <h1>@{{ user.username }}</h1>
   </div>
   
   <div class="profile-body">
+    <!-- Hakkımda -->
     <div class="bio-section">
       <h3>Hakkımda</h3>
-      <p>{{ user.bio or "Henüz bir biyografi eklenmemiş" }}</p>
+      <p>{{ user.bio if user.bio else "Henüz bir biyografi eklenmemiş" }}</p>
     </div>
     
+    <!-- İstatistikler -->
     <div class="profile-stats">
       <div class="stat-item">
-        <h4>0</h4>
+        <h4>{{ stats.followers or 0 }}</h4>
         <p>Takipçi</p>
       </div>
       <div class="stat-item">
-        <h4>0</h4>
+        <h4>{{ stats.following or 0 }}</h4>
         <p>Takip</p>
       </div>
       <div class="stat-item">
-        <h4>0</h4>
+        <h4>{{ stats.posts or 0 }}</h4>
         <p>Gönderi</p>
       </div>
     </div>
     
-    <!-- Profil Düzenleme Formu -->
+    <!-- Profili Düzenle -->
     <div class="edit-form">
       <h3>Profili Düzenle</h3>
       <form method="POST" enctype="multipart/form-data">

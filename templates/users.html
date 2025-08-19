@@ -1,63 +1,84 @@
 {% extends "base.html" %}
-{% block title %}Kullanıcıları Keşfet{% endblock %}
+{% block title %}{{ user.username }}'nin Profili{% endblock %}
 
 {% block content %}
 <style>
-  .user-card {
-    background: rgba(0, 0, 30, 0.85);
+  .profile-card {
+    background-color: rgba(0, 0, 30, 0.85);
+    padding: 2rem;
     border-radius: 10px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    transition: all 0.3s;
-  }
-  
-  .user-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-  }
-  
-  .user-avatar {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    margin-right: 1rem;
-    object-fit: cover;
-  }
-  
-  .search-bar {
     margin-bottom: 2rem;
+    color: white;
+    text-align: center;
+  }
+
+  .profile-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1rem;
+  }
+
+  .follow-btn {
+    margin-top: 1rem;
+  }
+
+  .post-card {
+    background-color: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+    color: white;
+  }
+
+  .post-image {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    margin-top: 1rem;
+  }
+
+  .stats {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #aaa;
   }
 </style>
 
 <div class="container mt-4">
-  <div class="search-bar">
-    <div class="input-group">
-      <input type="text" class="form-control" placeholder="Kullanıcı ara...">
-      <button class="btn btn-primary"><i class="fas fa-search"></i></button>
+  <div class="profile-card">
+    <img src="{{ url_for('static', filename='post_images/' ~ (user.profile_image if user.profile_image else 'default_avatar.jpg')) }}" class="profile-avatar" alt="Profil Fotoğrafı">
+    <h3>{{ user.username }}</h3>
+    <p>{{ user.bio or "Henüz biyografi yazılmamış." }}</p>
+
+    <div class="stats">
+      <span><strong>{{ user.posts_count() }}</strong> gönderi</span> |
+      <span><strong>{{ user.followers_count() }}</strong> takipçi</span> |
+      <span><strong>{{ user.following_count() }}</strong> takip</span>
     </div>
+
+    {% if current_user != user %}
+      <form method="POST" action="{{ url_for('follow' if not is_following else 'unfollow', username=user.username) }}" class="follow-btn">
+        <button type="submit" class="btn btn-{{ 'primary' if not is_following else 'secondary' }}">
+          {{ 'Takip Et' if not is_following else 'Takibi Bırak' }}
+        </button>
+      </form>
+    {% endif %}
   </div>
-  
-  <div class="user-list">
-    <!-- Örnek Kullanıcılar -->
-    <div class="user-card">
-      <img src="/static/avatar1.jpg" class="user-avatar">
-      <div>
-        <h5>Ayşe Yılmaz</h5>
-        <p class="text-muted">@ayseyilmaz</p>
-      </div>
-      <a href="/profile/ayseyilmaz" class="btn btn-outline-light ms-auto">Profili Gör</a>
+
+  <h4 class="text-light mb-3">Gönderiler</h4>
+  {% for post in user.posts|sort(attribute='timestamp', reverse=True) %}
+    <div class="post-card">
+      <p>{{ post.body }}</p>
+      {% if post.image %}
+        <img src="{{ url_for('static', filename='post_images/' ~ post.image) }}" class="post-image">
+      {% endif %}
+      <small class="text-muted">{{ post.timestamp.strftime('%d.%m.%Y %H:%M') }}</small>
     </div>
-    
-    <div class="user-card">
-      <img src="/static/avatar2.jpg" class="user-avatar">
-      <div>
-        <h5>Mehmet Kaya</h5>
-        <p class="text-muted">@mkaya</p>
-      </div>
-      <a href="/profile/mkaya" class="btn btn-outline-light ms-auto">Profili Gör</a>
-    </div>
-  </div>
+  {% else %}
+    <p class="text-light">Henüz paylaşım yok.</p>
+  {% endfor %}
 </div>
 {% endblock %}

@@ -7,7 +7,6 @@ import time
 from datetime import datetime
 from flask_migrate import Migrate
 
-# Önce models modülünden db'yi import ediyoruz
 from models import db, User, Post, Comment
 
 app = Flask(__name__)
@@ -15,44 +14,59 @@ app.config['SECRET_KEY'] = 'gizli_anahtar'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///users.db'
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
-# Fotoğraf yükleme klasörlerini ve sınırlarını ayarlama
-app.config['UPLOAD_FOLDER'] = os.path.join('static', 'post_images')
-app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 MB sınırı
-
+# Fotoğraf yükleme klasörleri
+app.config['POST_IMAGES_FOLDER'] = os.path.join('static', 'post_images')
+app.config['PROFILE_PIC_FOLDER'] = os.path.join('static', 'profile_images')
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 MB
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-# Bağlantı oluşturma
+# Flask eklentileri
 bcrypt = Bcrypt(app)
 login_manager = LoginManager(app)
 login_manager.login_view = 'login'
-
-# db'yi app ile başlat
 db.init_app(app)
 migrate = Migrate(app, db)
-
-# ===================== LOGIN MANAGER ===================== #
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-# ===================== ROUTELAR ===================== #
+# ===================== HELPER ===================== #
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# ===================== ROUTES ===================== #
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
-@app.route("/register", methods=["GET", "POST"], strict_slashes=False)
+@app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         username = request.form["username"]
         password = request.form["password"]
+
+        if User.query.filter_by(username=username).first():
+            flash("Bu kullanıcı adı zaten alınmış!", "danger")
+            return redirect(url_for("register"))
+
+        if len(password) < 6:
+            flash("Şifre en az 6 karakter olmalı.", "warning")
+            return redirect(url_for("register"))
+
         hashed_pw = bcrypt.generate_password_hash(password).decode('utf-8')
-        user = User(username=username, password=hashed_pw)
+        user = User(
+            username=username,
+            password=hashed_pw,
+            profile_image="default_avatar.png"  # Default avatar
+        )
         db.session.add(user)
         db.session.commit()
         flash("Kayıt başarılı, şimdi giriş yapabilirsin!", "success")
         return redirect(url_for("login"))
+
     return render_template("register.html")
 
 @app.route("/login", methods=["GET", "POST"])
@@ -79,29 +93,28 @@ def dashboard():
 def posts():
     if request.method == "POST":
         content = request.form["content"]
-        image = request.files.get("image")  # Fotoğrafı alıyoruz
+        image = request.files.get("image")
 
         image_filename = None
-        if image:
-            # Fotoğrafın adı ve uzantısını güvenli bir şekilde alıyoruz
-            image_filename = secure_filename(image.filename)
-            image_path = os.path.join(app.root_path, 'static', 'post_images', image_filename)
-            image.save(image_path)  # Fotoğrafı kaydediyoruz
+        if image and allowed_file(image.filename):
+            secure_name = secure_filename(image.filename)
+            timestamp = str(int(time.time()))
+            image_filename = f"{current_user.username}_{timestamp}_{secure_name}"
+            image_path = os.path.join(app.root_path, app.config['POST_IMAGES_FOLDER'], image_filename)
+            image.save(image_path)
+        elif image:
+            flash("Geçersiz dosya türü!", "danger")
+            return redirect(url_for("posts"))
 
-        post = Post(body=content, user_id=current_user.id, image=image_filename)  # Fotoğrafı veritabanına kaydediyoruz
+        post = Post(body=content, user_id=current_user.id, image=image_filename)
         db.session.add(post)
         db.session.commit()
         flash("Gönderi paylaşıldı!", "success")
         return redirect(url_for("posts"))
 
-    # Takip ettiğiniz kişilerin gönderilerini alın
     all_posts = Post.query.order_by(Post.timestamp.desc()).all()
-    # Gönderileri tarihine göre sırala
-    all_posts.sort(key=lambda x: x.timestamp, reverse=True)
-
     return render_template("posts.html", posts=all_posts)
 
-# Beğenme işlemi
 @app.route('/like_post/<int:post_id>', methods=['POST'])
 @login_required
 def like_post(post_id):
@@ -115,7 +128,6 @@ def like_post(post_id):
     db.session.commit()
     return redirect(url_for('posts'))
 
-# Yorum ekleme işlemi
 @app.route('/comment_post/<int:post_id>', methods=['POST'])
 @login_required
 def comment_post(post_id):
@@ -142,11 +154,8 @@ def logout():
 def admin_panel():
     if current_user.username == "admin":
         return render_template("admin_panel.html")
-    
     flash("Yetkisiz erişim!", "danger")
     return redirect(url_for("dashboard"))
-
-# ===================== PROFİL ===================== #
 
 @app.route('/profile', methods=['GET', 'POST'])
 @login_required
@@ -159,11 +168,11 @@ def profile():
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             _, ext = os.path.splitext(filename)
-            filename = current_user.username + '_' + str(int(time.time())) + ext
-            file_path = os.path.join(app.root_path, app.config['UPLOAD_FOLDER'], filename)
+            filename = f"{current_user.username}_{int(time.time())}{ext}"
+            file_path = os.path.join(app.root_path, app.config['PROFILE_PIC_FOLDER'], filename)
             file.save(file_path)
             current_user.profile_image = filename
-        
+
         db.session.commit()
         flash('Profil güncellendi!', 'success')
         return redirect(url_for('profile'))
@@ -174,9 +183,11 @@ def profile():
         "posts": current_user.posts_count()
     }
 
-    return render_template('profile.html', user=current_user, stats=stats)
+    # Avatar yolu
+    profile_image = current_user.profile_image or "default_avatar.png"
+    profile_image_url = url_for('static', filename=f'profile_images/{profile_image}')
 
-# ===================== TAKİP ET / BIRAK ===================== #
+    return render_template('profile.html', user=current_user, stats=stats, profile_image_url=profile_image_url)
 
 @app.route('/follow/<username>', methods=['POST'])
 @login_required
@@ -202,14 +213,20 @@ def unfollow(username):
     flash(f"{user.username} adlı kişiyi takipten çıktın", "info")
     return redirect(url_for('profile'))
 
-# ===================== HELPER ===================== #
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
 # ===================== MAIN ===================== #
 
 if __name__ == "__main__":
+    # Gerekli klasörlerin varlığını kontrol edip yoksa oluştur
+    os.makedirs(os.path.join(app.root_path, app.config['POST_IMAGES_FOLDER']), exist_ok=True)
+    os.makedirs(os.path.join(app.root_path, app.config['PROFILE_PIC_FOLDER']), exist_ok=True)
+
+    # Default avatar yoksa koyalım
+    default_path = os.path.join(app.root_path, app.config['PROFILE_PIC_FOLDER'], "default_avatar.png")
+    if not os.path.exists(default_path):
+        # Boş bir placeholder oluştur
+        with open(default_path, "wb") as f:
+            f.write(b"")
+
     with app.app_context():
         db.create_all()
     app.run(debug=True)
