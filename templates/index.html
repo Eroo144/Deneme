@@ -8,7 +8,7 @@
     height: 100%;
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    overflow-x: hidden;
+    overflow-x: hidden; /* Yatay kaydırmayı engelle */
     background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
     color: white;
   }
@@ -18,114 +18,45 @@
     width: 2px;
     height: 2px;
     background: transparent;
-    box-shadow: 
-      100px 200px white,
-      300px 400px white,
-      600px 700px white,
-      800px 120px white,
-      1200px 300px white,
-      400px 900px white,
-      950px 600px white,
-      1100px 100px white,
-      1400px 400px white,
-      1600px 800px white;
+    box-shadow: /* ... (yıldızlar aynı) ... */;
     animation: animStar 100s linear infinite;
   }
 
-  .stars2 {
-    width: 3px;
-    height: 3px;
-    box-shadow: 
-      200px 300px #fff,
-      500px 700px #fff,
-      900px 120px #fff,
-      1300px 600px #fff,
-      1700px 400px #fff;
-    animation: animStar 150s linear infinite;
-  }
-
-  .stars3 {
-    width: 1px;
-    height: 1px;
-    box-shadow: 
-      250px 500px #fff,
-      750px 200px #fff,
-      1250px 800px #fff,
-      1500px 300px #fff;
-    animation: animStar 200s linear infinite;
-  }
-
-  @keyframes animStar {
-    from { transform: translateY(0px); }
-    to { transform: translateY(-2000px); }
-  }
-
-  /* MOBİL İÇİN ANA DÜZEN */
+  /* KART SİSTEMİ */
   .main-container {
     display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding: 15px;
-    margin-bottom: 60px; /* Alt navigasyon için alan */
+    justify-content: space-around; /* Kartları eşit aralıklı dağıt */
+    gap: 40px; /* Kart aralarını büyüt */
+    padding: 60px 5%; /* Yan boşlukları artır */
+    flex-wrap: wrap;
   }
 
-  /* KART SİSTEMİ - MOBİL İÇİN */
   .card {
     background-color: rgba(0, 0, 30, 0.9);
-    border-radius: 15px;
-    border: 1px solid rgba(110, 142, 251, 0.3);
-    box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+    border-radius: 20px; /* Köşeleri daha yuvarlak */
+    border: 1px solid rgba(110, 142, 251, 0.4);
+    box-shadow: 0 10px 40px rgba(0,0,0,0.8);
     color: white;
     backdrop-filter: blur(10px);
-    padding: 20px;
-    width: 100%;
-    margin-bottom: 15px;
+    padding: 35px;
+    width: 25%; /* Genişlikleri esnek */
+    min-width: 300px; /* Minimum genişlik */
+    max-width: 500px; /* Maksimum genişlik */
+    transition: all 0.4s;
+    overflow-y: auto; /* Dikey kaydırma */
+    max-height: 80vh; /* Maksimum yükseklik */
   }
 
-  /* TABLET VE ÜSTÜ */
-  @media (min-width: 768px) {
-    .main-container {
-      flex-direction: row;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    
-    .side-card {
-      flex: 0 0 45%;
-      max-width: 45%;
-    }
-    
-    .main-card {
-      flex: 0 0 90%;
-      max-width: 90%;
-      order: -1;
-    }
+  .card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 50px rgba(110, 142, 251, 0.3);
   }
 
-  /* MASAÜSTÜ */
-  @media (min-width: 992px) {
-    .main-container {
-      justify-content: space-between;
-      flex-wrap: nowrap;
-    }
-    
-    .side-card {
-      flex: 0 0 28%;
-      max-width: 28%;
-    }
-    
-    .main-card {
-      flex: 0 0 38%;
-      max-width: 38%;
-      order: 0;
-    }
-  }
-
-  /* KAYDIRILABİLİR İÇERİK */
+  /* UZUN METİN DÜZENİ */
   .scrollable-content {
     overflow-y: auto;
-    padding-right: 10px;
-    max-height: 300px;
+    padding-right: 15px; /* Kaydırma çubuğu için boşluk */
+    max-height: 60vh; /* İçerik yüksekliği */
   }
 
   .scrollable-content::-webkit-scrollbar {
@@ -137,59 +68,19 @@
     border-radius: 3px;
   }
 
-  /* MOBİL YAZI BOYUTLARI */
-  h2 {
-    font-size: 1.4rem;
-    margin-bottom: 15px;
-  }
-  
-  h3 {
-    font-size: 1.1rem;
-    margin-bottom: 10px;
+  /* MERKEZ KART */
+  .main-card {
+    flex-grow: 1; /* Diğerlerinden daha geniş */
+    min-width: 350px;
   }
 
-  /* MOBİL BUTONLARI */
-  .btn-mobile {
-    padding: 12px 20px;
-    font-size: 1rem;
-    min-height: 44px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    margin: 5px;
+  /* YAN KARTLAR */
+  .side-card {
+    flex-basis: 25%;
   }
 
-  /* ETKİNLİK KARTLARI */
-  .event {
-    background: rgba(110, 142, 251, 0.1);
-    border-radius: 10px;
-    padding: 12px;
-    margin-bottom: 12px;
-    border-left: 3px solid #6e8efb;
-  }
-
-  .event h3 {
-    font-size: 1rem;
-    margin-bottom: 5px;
-    color: #a777e3;
-  }
-
-  .event p {
-    font-size: 0.9rem;
-    margin: 0;
-    color: #ccc;
-  }
-
-  /* LİSTE STİLLERİ */
-  ul, ol {
-    padding-left: 20px;
-    margin-bottom: 15px;
-  }
-
-  li {
-    margin-bottom: 8px;
-    font-size: 0.95rem;
-  }
+  /* BUTONLAR */
+  .btn { /* ... (önceki buton stilleri aynı) ... */ }
 </style>
 
 <!-- Yıldız Arka Plan -->
@@ -197,17 +88,39 @@
 <div class="stars2"></div>
 <div class="stars3"></div>
 
+<!-- Ana sayfaya (index.html) ekleyin -->
+<div class="quick-actions">
+  <a href="/profile/edit" class="btn btn-sm btn-outline-light floating-btn">
+    <i class="fas fa-user-edit"></i> Profili Düzenle
+  </a>
+</div>
+
+<style>
+  .floating-btn {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+</style>
+
 <!-- Ana İçerik -->
 <div class="main-container">
   <!-- Sol Yan Kart -->
   <div class="card side-card">
-    <h2><i class="fas fa-gavel me-2"></i>Topluluk Kuralları</h2>
+    <h2>Topluluk Kuralları</h2>
     <div class="scrollable-content">
       <h3>1. Nezaket Kuralları</h3>
-      <p>Topluluğumuzda herkese saygılı davranılmalıdır. Küfürlü, aşağılayıcı veya nefret söylemi içeren hiçbir içeriğe izin verilmez.</p>
+      <p>Topluluğumuzda herkese saygılı davranılmalıdır. Küfürlü, aşağılayıcı veya nefret söylemi içeren hiçbir içeriğe izin verilmez. Unutmayın ki karşınızdaki de sizin gibi bir insan.</p>
       
       <h3>2. Gizlilik</h3>
-      <p>Kendi özel bilgilerinizi veya başkalarının kişisel bilgilerini paylaşmayın. Telefon numarası, adres gibi hassas bilgiler kesinlikle yasaktır.</p>
+      <p>Kendi özel bilgilerinizi veya başkalarının kişisel bilgilerini paylaşmayın. Telefon numarası, adres, TC kimlik numarası gibi hassas bilgiler kesinlikle yasaktır.</p>
       
       <h3>3. İçerik Paylaşımı</h3>
       <p>Spam, reklam veya uygunsuz içerik paylaşımı yapmayın. Paylaşımlarınızın topluluk kurallarına uygun olduğundan emin olun.</p>
@@ -222,7 +135,7 @@
 
   <!-- Merkez Kart -->
   <div class="card main-card">
-    <h2><i class="fas fa-star me-2"></i>Yıldızlar Arasında Bağlantı Kur</h2>
+    <h2>Yıldızlar Arasında Bağlantı Kur</h2>
     <div class="scrollable-content">
       <p>Evrenin sonsuz boşluğunda yalnız bir gezgin misiniz? Yıldızların altında yeni dostluklar kurmak için doğru yerdesiniz!</p>
       
@@ -242,15 +155,15 @@
         <li>Topluluğa katılın!</li>
       </ol>
     </div>
-    <div class="mt-3 text-center">
-      <a href="/register" class="btn btn-primary btn-mobile">Ücretsiz Kaydol</a>
-      <a href="/login" class="btn btn-outline-light btn-mobile">Giriş Yap</a>
+    <div style="margin-top: 20px;">
+      <a href="/register" class="btn btn-primary">Ücretsiz Kaydol</a>
+      <a href="/login" class="btn btn-outline">Giriş Yap</a>
     </div>
   </div>
 
   <!-- Sağ Yan Kart -->
   <div class="card side-card">
-    <h2><i class="fas fa-calendar-alt me-2"></i>Yakın Etkinlikler</h2>
+    <h2>Yakın Etkinlikler</h2>
     <div class="scrollable-content">
       <div class="event">
         <h3>Galaktik Film Gecesi</h3>
@@ -280,11 +193,7 @@
         <strong>Seviye:</strong> Başlangıç</p>
       </div>
     </div>
-    <div class="text-center mt-2">
-      <a href="#" style="color: #6e8efb; text-decoration: none;">
-        <small>Tüm Etkinlikler <i class="fas fa-arrow-right"></i></small>
-      </a>
-    </div>
+    <a href="#" style="display: block; text-align: center; margin-top: 15px; color: #6e8efb;">Tüm Etkinlikler →</a>
   </div>
 </div>
 {% endblock %}

@@ -2,30 +2,25 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8"/>
-    <!-- MOBİL İÇİN EN ÖNEMLİ META TAG! -->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Flask App{% endblock %}</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
-    <!-- FONTAWESOME CDN (Tüm sayfalar için buradan yüklenecek) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
       /* Genel arkaplan ve yazılar */
       html, body {
         height: 100%;
         margin: 0;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        overflow-x: hidden;
+        overflow: hidden;
         background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
         color: white;
       }
 
-      /* Navbar arkaplan - MOBİL UYUMLU */
+      /* Navbar arkaplan */
       .navbar {
-        background-color: rgba(10, 10, 30, 0.95) !important;
+        background-color: rgba(10, 10, 30, 0.85) !important;
         backdrop-filter: blur(6px);
         border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        z-index: 1000;
-        padding: 0.5rem 1rem;
+        z-index: 100;
       }
 
       /* Navbar yazılar */
@@ -33,55 +28,26 @@
       .navbar .navbar-brand {
         color: #f0f0f0 !important;
         transition: color 0.3s ease;
-        font-size: 1rem;
+        font-size: 1.1rem;
       }
       .navbar .nav-link:hover,
       .navbar .navbar-brand:hover {
         color: #ffffff !important;
       }
 
-      /* MOBİL MENÜ TOGGLER */
-      .navbar-toggler {
-        border: 1px solid rgba(255,255,255,0.3);
-        padding: 0.25rem 0.5rem;
-      }
-      .navbar-toggler-icon {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
-      }
-
-      /* Özel butonlar - MOBİLDE DAHA KÜÇÜK */
+      /* Özel butonlar */
       .navbar .btn-custom {
         background: linear-gradient(135deg, #4facfe, #00f2fe);
         color: white !important;
         font-weight: 600;
-        padding: 0.4rem 0.8rem;
+        padding: 6px 14px;
         border-radius: 8px;
-        margin-left: 0.5rem;
-        font-size: 0.9rem;
+        margin-left: 10px;
         transition: transform 0.2s, box-shadow 0.2s;
       }
       .navbar .btn-custom:hover {
         transform: scale(1.05);
         box-shadow: 0 0 12px rgba(0, 242, 254, 0.6);
-      }
-
-      /* MOBİL MENÜ AÇILDIĞINDA STİL */
-      @media (max-width: 991.98px) {
-        .navbar-collapse {
-          background-color: rgba(10, 10, 30, 0.98);
-          padding: 1rem;
-          border-radius: 0 0 10px 10px;
-          border: 1px solid rgba(255,255,255,0.1);
-          margin-top: 0.5rem;
-        }
-        .navbar-nav {
-          text-align: center;
-        }
-        .navbar .btn-custom {
-          margin: 0.5rem 0;
-          display: block;
-          width: 100%;
-        }
       }
 
       /* Yıldız efektleri */
@@ -134,12 +100,10 @@
     </style>
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark">
+<nav class="navbar navbar-expand-lg">
   <div class="container">
-    <a class="navbar-brand" href="{{ url_for('index') }}">
-      <i class="fas fa-rocket me-1"></i>SpaceSocial
-    </a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu" aria-controls="navMenu" aria-expanded="false" aria-label="Toggle navigation">
+    <a class="navbar-brand" href="{{ url_for('index') }}">Anasayfa</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navMenu">
@@ -149,14 +113,14 @@
             <a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('profile') }}">Profil</a>
+            <a class="nav-link" href="{{ url_for('profile') }}">Profil Düzenle</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="{{ url_for('posts') }}">Gönderiler</a>
           </li>
           {% if current_user.username == 'admin' %}
             <li class="nav-item">
-              <a class="nav-link" href="{{ url_for('admin_panel') }}">Admin</a>
+              <a class="nav-link" href="{{ url_for('admin_panel') }}">Admin Panel</a>
             </li>
           {% endif %}
           <li class="nav-item">

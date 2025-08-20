@@ -8,10 +8,6 @@
     color: white;
     min-height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
   }
   
   .stars, .stars2, .stars3 {
@@ -61,40 +57,25 @@
     to { transform: translateY(-2000px); }
   }
   
-  .register-container {
-    width: 100%;
-    max-width: 400px;
-    z-index: 10;
-  }
-  
   .card {
-    background-color: rgba(0, 0, 30, 0.95);
-    border: 1px solid rgba(110, 142, 251, 0.3);
+    background-color: rgba(0, 0, 30, 0.85);
     border-radius: 15px;
+    border: 1px solid rgba(110, 142, 251, 0.3);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.7);
+    color: white;
     backdrop-filter: blur(10px);
-    box-shadow: 0 0 30px rgba(110, 142, 251, 0.2);
   }
   
   .card-header {
     background-color: rgba(20, 20, 40, 0.7);
     border-bottom: 1px solid rgba(110, 142, 251, 0.3);
     color: #6e8efb;
-    text-align: center;
-    padding: 20px;
-  }
-  
-  .card-body {
-    padding: 25px;
   }
   
   .form-control {
     background-color: rgba(30, 30, 50, 0.7);
     border: 1px solid rgba(110, 142, 251, 0.3);
     color: white;
-    padding: 15px;
-    font-size: 16px;
-    border-radius: 10px;
-    margin-bottom: 15px;
   }
   
   .form-control:focus {
@@ -108,10 +89,6 @@
     background: linear-gradient(135deg, #4CAF50, #2E7D32);
     border: none;
     transition: all 0.3s;
-    padding: 15px;
-    font-size: 16px;
-    border-radius: 10px;
-    width: 100%;
   }
   
   .btn-success:hover {
@@ -122,15 +99,12 @@
   .card-footer {
     background-color: rgba(20, 20, 40, 0.5);
     border-top: 1px solid rgba(110, 142, 251, 0.2);
-    padding: 20px;
-    text-align: center;
   }
   
   a {
     color: #a777e3;
     text-decoration: none;
     transition: color 0.3s;
-    font-size: 14px;
   }
   
   a:hover {
@@ -140,40 +114,7 @@
   .alert {
     background-color: rgba(20, 20, 40, 0.9);
     border: 1px solid rgba(110, 142, 251, 0.3);
-    border-radius: 10px;
-    margin-bottom: 15px;
-  }
-
-  /* Şifre güçlüğü göstergesi */
-  .password-strength {
-    height: 5px;
-    background: #eee;
-    border-radius: 3px;
-    margin-top: 5px;
-    margin-bottom: 15px;
-  }
-
-  .strength-weak { background: #ff4757; width: 33%; }
-  .strength-medium { background: #ffa502; width: 66%; }
-  .strength-strong { background: #2ed573; width: 100%; }
-
-  /* Mobil için ek stiller */
-  @media (max-width: 480px) {
-    .card {
-      margin: 10px;
-    }
-    
-    .card-body {
-      padding: 20px;
-    }
-    
-    .form-control {
-      padding: 12px;
-    }
-    
-    .btn-success {
-      padding: 12px;
-    }
+    color: white;
   }
 </style>
 
@@ -182,83 +123,45 @@
 <div class="stars2"></div>
 <div class="stars3"></div>
 
-<div class="register-container">
-    <div class="card shadow-lg">
-        <div class="card-header">
-            <h4><i class="fas fa-user-astronaut me-2"></i>Kayıt Ol</h4>
-        </div>
-        <div class="card-body">
-            {% with messages = get_flashed_messages(with_categories=true) %}
-              {% if messages %}
-                {% for category, message in messages %}
-                  <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                  </div>
-                {% endfor %}
-              {% endif %}
-            {% endwith %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-lg">
+                <div class="card-header text-center py-3">
+                    <h4><i class="fas fa-user-astronaut me-2"></i>Kayıt Ol</h4>
+                </div>
+                <div class="card-body px-4 py-4">
+                    {% with messages = get_flashed_messages(with_categories=true) %}
+                      {% if messages %}
+                        {% for category, message in messages %}
+                          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                          </div>
+                        {% endfor %}
+                      {% endif %}
+                    {% endwith %}
 
-            <form method="POST" id="registerForm">
-                <div class="mb-3">
-                    <input type="text" name="username" class="form-control" placeholder="Kullanıcı adı" required minlength="3" maxlength="20">
-                    <small class="text-muted">3-20 karakter arası</small>
+                    <form method="POST">
+                        <div class="mb-3">
+                            <input type="text" name="username" class="form-control py-2" placeholder="Kullanıcı adı" required>
+                        </div>
+                        <div class="mb-4">
+                            <input type="password" name="password" class="form-control py-2" placeholder="Şifre" required>
+                        </div>
+                        <button type="submit" class="btn btn-success py-2 w-100">
+                            <i class="fas fa-user-plus me-2"></i>Kayıt Ol
+                        </button>
+                    </form>
                 </div>
-                <div class="mb-3">
-                    <input type="password" name="password" class="form-control" placeholder="Şifre" required minlength="6" id="passwordInput">
-                    <div class="password-strength" id="passwordStrength"></div>
-                    <small class="text-muted">En az 6 karakter</small>
+                <div class="card-footer text-center py-3">
+                    <a href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt me-1"></i>Zaten hesabın var mı? Giriş yap</a>
                 </div>
-                <div class="mb-4">
-                    <input type="password" name="confirm_password" class="form-control" placeholder="Şifre tekrar" required>
-                </div>
-                <button type="submit" class="btn btn-success">
-                    <i class="fas fa-user-plus me-2"></i>Kayıt Ol
-                </button>
-            </form>
-        </div>
-        <div class="card-footer">
-            <a href="{{ url_for('login') }}"><i class="fas fa-sign-in-alt me-1"></i>Zaten hesabın var mı? Giriş yap</a>
+            </div>
         </div>
     </div>
 </div>
 
-<script>
-// Şifre güçlüğü göstergesi
-document.getElementById('passwordInput').addEventListener('input', function(e) {
-    const password = e.target.value;
-    const strengthBar = document.getElementById('passwordStrength');
-    
-    if (password.length === 0) {
-        strengthBar.className = 'password-strength';
-        return;
-    }
-    
-    let strength = 0;
-    if (password.length >= 6) strength++;
-    if (password.length >= 8) strength++;
-    if (/[A-Z]/.test(password)) strength++;
-    if (/[0-9]/.test(password)) strength++;
-    if (/[^A-Za-z0-9]/.test(password)) strength++;
-    
-    if (strength <= 2) {
-        strengthBar.className = 'password-strength strength-weak';
-    } else if (strength <= 4) {
-        strengthBar.className = 'password-strength strength-medium';
-    } else {
-        strengthBar.className = 'password-strength strength-strong';
-    }
-});
-
-// Form validation
-document.getElementById('registerForm').addEventListener('submit', function(e) {
-    const password = document.querySelector('input[name="password"]').value;
-    const confirmPassword = document.querySelector('input[name="confirm_password"]').value;
-    
-    if (password !== confirmPassword) {
-        e.preventDefault();
-        alert('Şifreler eşleşmiyor!');
-    }
-});
-</script>
+<!-- FontAwesome Icons -->
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 {% endblock %}
