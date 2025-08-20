@@ -8,6 +8,10 @@
     color: white;
     min-height: 100vh;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
   }
   
   .stars, .stars2, .stars3 {
@@ -15,8 +19,41 @@
     width: 2px;
     height: 2px;
     background: transparent;
-    box-shadow: /* Yıldız gölgeleri */;
+    box-shadow: 
+      100px 200px white,
+      300px 400px white,
+      600px 700px white,
+      800px 120px white,
+      1200px 300px white,
+      400px 900px white,
+      950px 600px white,
+      1100px 100px white,
+      1400px 400px white,
+      1600px 800px white;
     animation: animStar 100s linear infinite;
+  }
+  
+  .stars2 {
+    width: 3px;
+    height: 3px;
+    box-shadow: 
+      200px 300px #fff,
+      500px 700px #fff,
+      900px 120px #fff,
+      1300px 600px #fff,
+      1700px 400px #fff;
+    animation: animStar 150s linear infinite;
+  }
+  
+  .stars3 {
+    width: 1px;
+    height: 1px;
+    box-shadow: 
+      250px 500px #fff,
+      750px 200px #fff,
+      1250px 800px #fff,
+      1500px 300px #fff;
+    animation: animStar 200s linear infinite;
   }
   
   @keyframes animStar {
@@ -24,8 +61,14 @@
     to { transform: translateY(-2000px); }
   }
   
+  .login-container {
+    width: 100%;
+    max-width: 400px;
+    z-index: 10;
+  }
+  
   .card {
-    background-color: rgba(0, 0, 30, 0.85);
+    background-color: rgba(0, 0, 30, 0.95);
     border: 1px solid rgba(110, 142, 251, 0.3);
     border-radius: 15px;
     backdrop-filter: blur(10px);
@@ -36,12 +79,22 @@
     background-color: rgba(20, 20, 40, 0.7);
     border-bottom: 1px solid rgba(110, 142, 251, 0.3);
     color: #6e8efb;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  .card-body {
+    padding: 25px;
   }
   
   .form-control {
     background-color: rgba(30, 30, 50, 0.7);
     border: 1px solid rgba(110, 142, 251, 0.3);
     color: white;
+    padding: 15px;
+    font-size: 16px;
+    border-radius: 10px;
+    margin-bottom: 15px;
   }
   
   .form-control:focus {
@@ -55,6 +108,10 @@
     background: linear-gradient(135deg, #6e8efb, #4a6cf7);
     border: none;
     transition: all 0.3s;
+    padding: 15px;
+    font-size: 16px;
+    border-radius: 10px;
+    width: 100%;
   }
   
   .btn-primary:hover {
@@ -65,12 +122,15 @@
   .card-footer {
     background-color: rgba(20, 20, 40, 0.5);
     border-top: 1px solid rgba(110, 142, 251, 0.2);
+    padding: 20px;
+    text-align: center;
   }
   
   a {
     color: #a777e3;
     text-decoration: none;
     transition: color 0.3s;
+    font-size: 14px;
   }
   
   a:hover {
@@ -80,6 +140,27 @@
   .alert {
     background-color: rgba(20, 20, 40, 0.9);
     border: 1px solid rgba(110, 142, 251, 0.3);
+    border-radius: 10px;
+    margin-bottom: 15px;
+  }
+
+  /* Mobil için ek stiller */
+  @media (max-width: 480px) {
+    .card {
+      margin: 10px;
+    }
+    
+    .card-body {
+      padding: 20px;
+    }
+    
+    .form-control {
+      padding: 12px;
+    }
+    
+    .btn-primary {
+      padding: 12px;
+    }
   }
 </style>
 
@@ -88,45 +169,38 @@
 <div class="stars2"></div>
 <div class="stars3"></div>
 
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6 col-lg-4">
-            <div class="card shadow-lg">
-                <div class="card-header text-center py-3">
-                    <h4><i class="fas fa-rocket me-2"></i>Giriş Yap</h4>
-                </div>
-                <div class="card-body px-4 py-4">
-                    {% with messages = get_flashed_messages(with_categories=true) %}
-                      {% if messages %}
-                        {% for category, message in messages %}
-                          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                          </div>
-                        {% endfor %}
-                      {% endif %}
-                    {% endwith %}
+<div class="login-container">
+    <div class="card shadow-lg">
+        <div class="card-header">
+            <h4><i class="fas fa-rocket me-2"></i>Giriş Yap</h4>
+        </div>
+        <div class="card-body">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
 
-                    <form method="POST">
-                        <div class="mb-3">
-                            <input type="text" name="username" class="form-control py-2" placeholder="Kullanıcı adı" required>
-                        </div>
-                        <div class="mb-4">
-                            <input type="password" name="password" class="form-control py-2" placeholder="Şifre" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary py-2 w-100">
-                            <i class="fas fa-sign-in-alt me-2"></i>Giriş Yap
-                        </button>
-                    </form>
+            <form method="POST">
+                <div class="mb-3">
+                    <input type="text" name="username" class="form-control" placeholder="Kullanıcı adı" required>
                 </div>
-                <div class="card-footer text-center py-3">
-                    <a href="{{ url_for('register') }}"><i class="fas fa-user-plus me-1"></i>Hesabın yok mu? Kayıt ol</a>
+                <div class="mb-4">
+                    <input type="password" name="password" class="form-control" placeholder="Şifre" required>
                 </div>
-            </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt me-2"></i>Giriş Yap
+                </button>
+            </form>
+        </div>
+        <div class="card-footer">
+            <a href="{{ url_for('register') }}"><i class="fas fa-user-plus me-1"></i>Hesabın yok mu? Kayıt ol</a>
         </div>
     </div>
 </div>
-
-<!-- FontAwesome Icons -->
-<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 {% endblock %}

@@ -2,143 +2,243 @@
 
 {% block content %}
 <style>
-    /* YILDIZLAR VE ARKA PLAN (base.html'den kopyala veya bu stil base'de zaten var) */
-    html, body {
-        height: 100%;
-        margin: 0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        overflow-x: hidden;
-        background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
-        color: white;
-    }
-    /* POST SAYFASI ÖZEL STİLLERİ */
-    .container-fluid.vh-100 {
-        height: 100vh;
-        max-width: 100%;
-        padding: 20px;
-        background: transparent !important; /* Arka plan gradient'inin görünmesini sağla */
-    }
-    
-    .row.h-100 {
-        height: 100%;
-    }
-    
-    .col-md-3.h-100, .col-md-6.h-100 {
-        height: 100%;
-        max-height: 100vh;
-        color: white; /* Tüm yazılar beyaz */
+    /* MOBİL İÇİN CRITICAL DÜZENLEMELER */
+    .main-posts-container {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1rem;
+        padding-bottom: 70px; /* Alt navigasyon için alan */
     }
 
-    /* KARTLARI KARANLIK TEMAYA UYARLA */
-    .col-md-3.h-100, .col-md-6.h-100, .posts-list > div {
-        background-color: rgba(0, 0, 30, 0.85) !important;
+    /* Mobilde tam genişlik, masaüstünde yan yana */
+    .post-create-card,
+    .posts-feed-card,
+    .info-sidebar-card {
+        width: 100%;
+        margin-bottom: 1rem;
+        background: rgba(0, 0, 30, 0.9) !important;
         border-radius: 15px;
         border: 1px solid rgba(110, 142, 251, 0.3);
-        padding: 20px;
-        margin-bottom: 20px;
+        padding: 1.5rem;
         backdrop-filter: blur(10px);
-        box-shadow: 0 8px 30px rgba(0,0,0,0.7);
-        color: white !important;
+        color: white;
     }
 
-    /* FORMLARI KARANLIK TEMAYA UYARLA */
-    .form-control {
-        background-color: rgba(30, 30, 50, 0.7) !important;
-        border: 1px solid rgba(110, 142, 251, 0.3) !important;
-        color: white !important;
-    }
-    .form-control:focus {
-        background-color: rgba(40, 40, 60, 0.8) !important;
-        border-color: #6e8efb !important;
-        color: white !important;
-        box-shadow: 0 0 0 0.25rem rgba(110, 142, 251, 0.25) !important;
+    /* Masaüstü görünümü */
+    @media (min-width: 992px) {
+        .main-posts-container {
+            flex-direction: row;
+            height: calc(100vh - 80px);
+        }
+        .post-create-card {
+            flex: 0 0 25%;
+            height: 100%;
+            overflow-y: auto;
+        }
+        .posts-feed-card {
+            flex: 0 0 50%;
+            height: 100%;
+            overflow-y: auto;
+        }
+        .info-sidebar-card {
+            flex: 0 0 23%;
+            height: 100%;
+            overflow-y: auto;
+        }
     }
 
-    /* YORUM ALANI STİLLERİ */
-    .posts-list > div .mb-2 {
-        background-color: rgba(40, 40, 60, 0.7) !important;
-        color: #f0f0f0 !important;
-        border: none !important;
+    /* Gönderi stilleri */
+    .post-item {
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        padding-bottom: 1rem;
+        margin-bottom: 1rem;
     }
-    hr {
-        border-color: rgba(255, 255, 255, 0.1) !important;
+    .post-item:last-child {
+        border-bottom: none;
+    }
+
+    /* Resimler için mobil uyumlu stil */
+    .post-image {
+        max-width: 100%;
+        border-radius: 10px;
+        margin-top: 0.5rem;
+    }
+
+    /* Butonlar için dokunmatik boyut */
+    .btn-mobile {
+        padding: 0.5rem 1rem;
+        min-height: 44px; /* Dokunmatik uyumlu boyut */
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    /* Mobil bottom navigation */
+    .mobile-bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(10, 10, 30, 0.95);
+        backdrop-filter: blur(10px);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        z-index: 1000;
+        padding: 0.5rem 0;
     }
 </style>
 
-<div class="container-fluid vh-100">
-    <div class="row h-100">
-        <!-- Sol: Gönderi Paylaşma Kartı -->
-        <div class="col-md-3 h-100 d-flex flex-column" style="padding-right: 15px;">
-            <h3>Gönderi Paylaş</h3>
-            <form method="POST" enctype="multipart/form-data" class="mb-4">
-                <textarea name="content" rows="3" placeholder="Bir şeyler yaz..." class="form-control mb-2" required></textarea>
-                <input type="file" name="image" accept="image/*" class="form-control mb-2">
-                <button type="submit" class="btn btn-primary w-100">Paylaş</button>
-            </form>
-        </div>
+<div class="main-posts-container">
 
-        <!-- Ortada: Gönderi Akışı -->
-        <div class="col-md-6 h-100" style="overflow-y: auto; padding: 0 15px;">
-            <h3>Gönderiler</h3>
-            <div class="posts-list">
-                {% for post in posts %}
-                    <div>
-                        <strong>{{ post.author.username }}</strong><br>
-                        <small>{{ post.timestamp.strftime("%d.%m.%Y %H:%M") }}</small>
-                        <p>{{ post.body }}</p>
+    <!-- SOL: Gönderi Oluşturma Kartı - MOBİLDE GİZLİ -->
+    <div class="post-create-card d-none d-lg-block">
+        <h5><i class="fas fa-edit me-2"></i>Gönderi Paylaş</h5>
+        <form method="POST" enctype="multipart/form-data">
+            <textarea name="content" rows="3" placeholder="Neler oluyor?" class="form-control mb-2" required></textarea>
+            <input type="file" name="image" accept="image/*" class="form-control mb-2" id="imageUpload">
+            <button type="submit" class="btn btn-primary w-100 btn-mobile">Paylaş</button>
+        </form>
+    </div>
+
+    <!-- ORTA: Gönderi Akışı -->
+    <div class="posts-feed-card">
+        <h5><i class="fas fa-stream me-2"></i>Gönderiler</h5>
+        <div class="posts-list">
+            {% for post in posts %}
+                <div class="post-item">
+                    <div class="d-flex align-items-center mb-2">
+                        <img src="{{ url_for('static', filename='profile_images/' ~ (post.author.profile_image if post.author.profile_image else 'default_avatar.png')) }}" 
+                             class="rounded-circle me-2" width="40" height="40" alt="Avatar" style="object-fit: cover;">
+                        <div>
+                            <strong>{{ post.author.username }}</strong>
+                            <br>
+                            <small class="text-muted">{{ post.timestamp.strftime("%d.%m.%Y %H:%M") }}</small>
+                        </div>
+                    </div>
+
+                    <p class="mb-2">{{ post.body }}</p>
+                    
+                    {% if post.image %}
+                        <img src="{{ url_for('static', filename='post_images/' + post.image) }}" 
+                             class="post-image img-fluid" 
+                             alt="Gönderi resmi">
+                    {% endif %}
+
+                    <!-- Beğeni/Yorum Butonları -->
+                    <div class="d-flex justify-content-around mt-3">
+                        <form action="{{ url_for('like_post', post_id=post.id) }}" method="POST" class="d-inline">
+                            <button type="submit" class="btn btn-sm {% if post.is_liked_by(current_user) %}btn-danger{% else %}btn-outline-light{% endif %} btn-mobile">
+                                <i class="fas fa-heart me-1"></i> {{ post.liked_by|length }}
+                            </button>
+                        </form>
                         
-                        {% if post.image %}
-                            <div class="mt-2">
-                                <img src="{{ url_for('static', filename='post_images/' + post.image) }}" alt="Post image" class="img-fluid" style="max-width: 100%; height: auto; border-radius: 8px;">
-                            </div>
-                        {% endif %}
-                        
-                        <div class="mt-3">
-                            <form action="{{ url_for('like_post', post_id=post.id) }}" method="POST" style="display: inline;">
-                                <button type="submit" class="btn btn-sm {% if post.is_liked_by(current_user) %}btn-danger{% else %}btn-outline-danger{% endif %} me-2">
-                                    ❤️ Beğen ({{ post.liked_by|length }})
+                        <button class="btn btn-outline-light btn-sm btn-mobile" type="button" data-bs-toggle="collapse" 
+                                data-bs-target="#commentSection{{ post.id }}" 
+                                aria-expanded="false">
+                            <i class="fas fa-comment me-1"></i> {{ post.post_comments|length }}
+                        </button>
+                    </div>
+
+                    <!-- Yorum Bölümü (Collapsible) -->
+                    <div class="collapse mt-3" id="commentSection{{ post.id }}">
+                        <form action="{{ url_for('comment_post', post_id=post.id) }}" method="POST" class="mb-3">
+                            <div class="input-group">
+                                <input type="text" name="comment" class="form-control" placeholder="Yorum yaz..." required>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i>
                                 </button>
-                            </form>
-                            <span>💬 Yorumlar ({{ post.post_comments|length }})</span>
-                        </div>
-                        
-                        <div class="mt-3">
-                            <form action="{{ url_for('comment_post', post_id=post.id) }}" method="POST">
-                                <div class="input-group">
-                                    <input type="text" name="comment" class="form-control" placeholder="Yorum yaz..." required>
-                                    <button type="submit" class="btn btn-primary">Gönder</button>
-                                </div>
-                            </form>
-                        </div>
-                        
+                            </div>
+                        </form>
+
                         {% if post.post_comments %}
-                            <div class="mt-3">
-                                <h6>Yorumlar:</h6>
+                            <div class="mt-2">
                                 {% for comment in post.post_comments %}
-                                    <div class="mb-2 p-2">
+                                    <div class="mb-2 p-2 small" style="background: rgba(255,255,255,0.05); border-radius: 8px;">
                                         <strong>{{ comment.user.username }}</strong>: 
                                         {{ comment.body }}
                                         <br>
-                                        <small>{{ comment.timestamp.strftime("%d.%m.%Y %H:%M") }}</small>
+                                        <small class="text-muted">{{ comment.timestamp.strftime("%d.%m.%Y %H:%M") }}</small>
                                     </div>
                                 {% endfor %}
                             </div>
                         {% endif %}
-                        <hr>
                     </div>
-                {% else %}
-                    <p>Henüz gönderi yok.</p>
-                {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-4">
+                    <i class="fas fa-feather-alt fa-3x mb-3 text-muted"></i>
+                    <p class="text-muted">Henüz gönderi yok. İlk gönderiyi sen paylaş!</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- SAĞ: Bilgilendirme - MOBİLDE GİZLİ -->
+    <div class="info-sidebar-card d-none d-lg-block">
+        <h5><i class="fas fa-info-circle me-2"></i>Bilgilendirme</h5>
+        <p class="small">Topluluk kurallarına uymayı unutmayın. 😊</p>
+        
+        <div class="mt-3">
+            <h6><i class="fas fa-calendar-alt me-2"></i>Yaklaşan Etkinlikler</h6>
+            <div class="small">
+                <div class="mb-2">📅 <strong>Yıldız Gözlem Gecesi</strong><br><small>15 Temmuz</small></div>
+                <div class="mb-2">🎬 <strong>Film Gecesi</strong><br><small>22 Temmuz</small></div>
             </div>
         </div>
+    </div>
 
-        <!-- Sağ: Bilgilendirme Kartı -->
-        <div class="col-md-3 h-100" style="padding-left: 15px;">
-            <h3>Bilgilendirme</h3>
-            <div>
-                <p>Bu alanda kullanıcılar için çeşitli bilgilendirmeler yapılabilir. Örneğin, hesap ayarları, duyurular veya yeni gelen özellikler hakkında bilgiler verilebilir.</p>
+</div>
+
+<!-- Mobil Bottom Navigation -->
+<nav class="mobile-bottom-nav d-lg-none">
+    <div class="container">
+        <div class="d-flex justify-content-around">
+            <a href="{{ url_for('posts') }}" class="btn btn-sm btn-outline-light d-flex flex-column align-items-center py-2">
+                <i class="fas fa-home mb-1"></i>
+                <small>Ana Sayfa</small>
+            </a>
+            <a href="{{ url_for('profile') }}" class="btn btn-sm btn-outline-light d-flex flex-column align-items-center py-2">
+                <i class="fas fa-user mb-1"></i>
+                <small>Profil</small>
+            </a>
+            <button class="btn btn-primary btn-sm d-flex flex-column align-items-center py-2" data-bs-toggle="modal" data-bs-target="#quickPostModal">
+                <i class="fas fa-plus mb-1"></i>
+                <small>Gönderi</small>
+            </button>
+            <a href="{{ url_for('logout') }}" class="btn btn-sm btn-outline-light d-flex flex-column align-items-center py-2">
+                <i class="fas fa-sign-out-alt mb-1"></i>
+                <small>Çıkış</small>
+            </a>
+        </div>
+    </div>
+</nav>
+
+<!-- Hızlı Gönderi Modal (Mobil için) -->
+<div class="modal fade" id="quickPostModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content" style="background: rgba(0, 0, 30, 0.95); border: 1px solid rgba(110, 142, 251, 0.3);">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Gönderi Paylaş</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" enctype="multipart/form-data" action="{{ url_for('posts') }}">
+                    <textarea name="content" rows="4" class="form-control mb-3" placeholder="Neler oluyor?" required></textarea>
+                    <input type="file" name="image" accept="image/*" class="form-control mb-3" id="mobileImageUpload">
+                    <button type="submit" class="btn btn-primary w-100 btn-mobile">Paylaş</button>
+                </form>
             </div>
         </div>
     </div>
 </div>
+
+<script>
+// Mobil için resim yükleme uyarısı
+document.getElementById('mobileImageUpload')?.addEventListener('change', function(e) {
+    if (e.target.files[0] && e.target.files[0].size > 2 * 1024 * 1024) {
+        alert('Resim boyutu 2MB\'dan küçük olmalıdır.');
+        e.target.value = '';
+    }
+});
+</script>
 {% endblock %}
