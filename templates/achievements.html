@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Başarımlar{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-trophy me-2"></i>Başarımlar</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for achievement in all_achievements %}
+                            <div class="col-md-6 mb-3">
+                                <div class="card {% if achievement in user_achievements|map(attribute='achievement') %}border-success{% else %}border-secondary{% endif %}">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-{% if achievement in user_achievements|map(attribute='achievement') %}trophy text-warning{% else %}lock text-muted{% endif %} fa-2x me-3"></i>
+                                            <div>
+                                                <h6 class="card-title mb-1">{{ achievement.name }}</h6>
+                                                <p class="card-text small mb-1">{{ achievement.description }}</p>
+                                                <span class="badge bg-info">{{ achievement.points }} puan</span>
+                                                {% if achievement in user_achievements|map(attribute='achievement') %}
+                                                    <span class="badge bg-success ms-2">Kazanıldı</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

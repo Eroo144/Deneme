@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Liderlik Tablosu{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-10">
+            <div class="card">
+                <div class="card-header">
+                    <h4><i class="fas fa-crown me-2"></i>Liderlik Tablosu</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Sıra</th>
+                                    <th>Kullanıcı</th>
+                                    <th>Puan</th>
+                                    <th>Seviye</th>
+                                    <th>Başarımlar</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for leader in leaders %}
+                                    <tr class="{% if loop.index <= 3 %}table-{% if loop.index == 1 %}warning{% elif loop.index == 2 %}secondary{% elif loop.index == 3 %}danger{% endif %}{% endif %}">
+                                        <td>{{ loop.index }}</td>
+                                        <td>
+                                            <strong>{{ leader.username }}</strong>
+                                            {% if loop.index == 1 %}👑{% elif loop.index == 2 %}🥈{% elif loop.index == 3 %}🥉{% endif %}
+                                        </td>
+                                        <td>{{ leader.points }}</td>
+                                        <td>{{ leader.level }}</td>
+                                        <td>{{ leader.achievements }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

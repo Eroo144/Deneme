@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Konuşma{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h4>
+                        <i class="fas fa-comments me-2"></i>
+                        {% for participant in conversation.participants %}
+                            {% if participant.id != current_user.id %}
+                                {{ participant.username }}
+                            {% endif %}
+                        {% endfor %}
+                    </h4>
+                </div>
+                <div class="card-body" style="height: 400px; overflow-y: auto;" id="messageContainer">
+                    {% for message in messages %}
+                        <div class="d-flex mb-3 {% if message.sender_id == current_user.id %}justify-content-end{% endif %}">
+                            <div class="card {% if message.sender_id == current_user.id %}bg-primary text-white{% else %}bg-light{% endif %}" 
+                                 style="max-width: 70%;">
+                                <div class="card-body p-2">
+                                    <p class="card-text mb-1">{{ message.content }}</p>
+                                    <small class="{% if message.sender_id == current_user.id %}text-white-50{% else %}text-muted{% endif %}">
+                                        {{ message.timestamp.strftime('%H:%M') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="card-footer">
+                    <form id="messageForm">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Mesaj yaz..." id="messageInput" required>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const messageContainer = document.getElementById('messageContainer');
+    messageContainer.scrollTop = messageContainer.scrollHeight;
+    
+    const form = document.getElementById('messageForm');
+    const input = document.getElementById('messageInput');
+    
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const message = input.value.trim();
+        if (message) {
+            // Socket.IO ile mesaj gönder
+            socket.emit('send_message', {
+                conversation_id: {{ conversation.id }},
+                content: message
+            });
+            input.value = '';
+        }
+    });
+});
+</script>
+{% endblock %}
