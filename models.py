@@ -1,14 +1,10 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from flask_login import UserMixin
-import redis
 import re
 
 # db'yi burada oluşturuyoruz
 db = SQLAlchemy()
-
-# Redis bağlantısı için
-redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
 
 # Beğeniler için ilişki
 likes = db.Table(
